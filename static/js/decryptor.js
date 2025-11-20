@@ -41,9 +41,47 @@
             );
             document.body.classList.remove("is-encrypted");
             document.documentElement.classList.add("is-decrypted");
-            document.open(root.dataset.mime || "text/html");
-            document.write(html);
-            document.close();
+            
+            // Modern yöntem: innerHTML kullan ve script'leri manuel çalıştır
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // Script etiketlerini bul ve yeniden oluştur (böylece çalışırlar)
+            const scripts = tempDiv.querySelectorAll('script');
+            const scriptsToExecute = [];
+            
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                
+                // Eğer src varsa, onu kullan (jQuery gibi)
+                if (oldScript.src) {
+                    newScript.src = oldScript.src;
+                    newScript.async = false; // Sıralı yükleme için
+                } else {
+                    // Inline script ise içeriği kopyala
+                    newScript.textContent = oldScript.textContent;
+                }
+                
+                // Diğer attribute'ları kopyala
+                Array.from(oldScript.attributes).forEach(attr => {
+                    if (attr.name !== 'src') {
+                        newScript.setAttribute(attr.name, attr.value);
+                    }
+                });
+                
+                scriptsToExecute.push(newScript);
+                oldScript.parentNode.removeChild(oldScript);
+            });
+            
+            // Body'yi temizle ve yeni içeriği ekle
+            document.body.innerHTML = '';
+            document.body.appendChild(tempDiv);
+            
+            // Script'leri sırayla ekle
+            scriptsToExecute.forEach(script => {
+                document.body.appendChild(script);
+            });
+            
         } catch (error) {
             console.error("Encrypted payload could not be decrypted", error);
             document.body.classList.add("encryption-error");
