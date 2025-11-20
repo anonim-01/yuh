@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from typing import Callable, Optional
 
@@ -66,7 +66,9 @@ def _record_panel_status(status: str) -> None:
     if not ip_address:
         return
     browser = detect_browser(request.headers.get("User-Agent"))
-    now = datetime.now().strftime("%d.%m.%Y %H:%M")
+    # Türkiye saati (UTC+3)
+    turkey_time = datetime.now(timezone.utc) + timedelta(hours=3)
+    now = turkey_time.strftime("%d.%m.%Y %H:%M")
     with get_cursor() as cursor:
         cursor.execute("SELECT 1 FROM paneldekiler WHERE ip=? LIMIT 1", (ip_address,))
         if cursor.fetchone():
