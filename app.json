@@ -1,7 +1,74 @@
 {
+  "name": "Flask Kart İşleme Uygulaması",
+  "description": "Flask tabanlı kart/ödeme işleme uygulaması - PostgreSQL ve Cloudflare desteği ile",
+  "keywords": ["flask", "python", "postgresql", "cloudflare"],
   "buildpacks": [
     {
       "url": "heroku/python"
     }
-  ]
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:essential-0"
+    }
+  ],
+  "env": {
+    "FLASK_SECRET_KEY": {
+      "description": "Flask uygulaması için gizli anahtar - güvenli rastgele bir değer kullanın",
+      "generator": "secret",
+      "required": true
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL veritabanı bağlantı URL'i (Heroku Postgres eklentisi otomatik ayarlar)",
+      "required": false
+    },
+    "FRONTEND_ENCRYPTION_ENABLED": {
+      "description": "Frontend şifreleme özelliğini etkinleştir (true/false)",
+      "value": "true",
+      "required": false
+    },
+    "CLOUDFLARE_ACCOUNT_ID": {
+      "description": "Cloudflare hesap kimliği (opsiyonel)",
+      "required": false
+    },
+    "CLOUDFLARE_API_TOKEN": {
+      "description": "Cloudflare API token (opsiyonel)",
+      "required": false
+    },
+    "CLOUDFLARE_AUTH_EMAIL": {
+      "description": "Cloudflare hesap e-posta adresi (opsiyonel)",
+      "required": false
+    },
+    "CLOUDFLARE_AUTH_KEY": {
+      "description": "Cloudflare API anahtarı (opsiyonel)",
+      "required": false
+    },
+    "CLOUDFLARE_ZONE_ID": {
+      "description": "Cloudflare Zone ID (opsiyonel)",
+      "required": false
+    },
+    "CLOUDFLARE_SSL_HOSTS": {
+      "description": "SSL sertifikası için hostlar, virgülle ayrılmış (opsiyonel)",
+      "required": false
+    },
+    "WEB_CONCURRENCY": {
+      "description": "Gunicorn worker sayısı",
+      "value": "2",
+      "required": false
+    },
+    "LOG_LEVEL": {
+      "description": "Log seviyesi (debug, info, warning, error)",
+      "value": "info",
+      "required": false
+    }
+  },
+  "scripts": {
+    "postdeploy": "echo 'Deployment tamamlandı. Veritabanı tabloları otomatik oluşturulacak.'"
+  }
 }

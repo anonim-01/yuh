@@ -7,3 +7,11 @@ logs/
 .env
 .DS_Store
 .idea/
+db.sqlite3
+*.sqlite3
+*.db
+node_modules/
+.vscode/
+*.swp
+*.swo
+*~

