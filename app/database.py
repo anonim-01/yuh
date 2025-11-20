@@ -7,9 +7,11 @@ from typing import Any, Generator, Optional, Sequence, Union
 try:
     from psycopg import connect as pg_connect  # type: ignore
     from psycopg.rows import dict_row  # type: ignore
+    from psycopg import Connection as PgConnection  # type: ignore
 except ImportError:  # pragma: no cover - optional dependency for SQLite-only installs
     pg_connect = None
     dict_row = None
+    PgConnection = None  # type: ignore
 
 from .config import AppConfig
 
@@ -207,7 +209,8 @@ def _prepare_query(query: str) -> str:
     return query
 
 
-def get_connection() -> Any:
+def get_connection() -> Union[sqlite3.Connection, Any]:
+    connection: Union[sqlite3.Connection, Any]
     if USING_POSTGRES:
         if not AppConfig.database_url:
             raise RuntimeError("DATABASE_URL is not configured but PostgreSQL mode is enabled.")
