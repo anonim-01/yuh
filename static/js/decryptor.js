@@ -48,39 +48,51 @@
             
             // Script etiketlerini bul ve yeniden oluştur (böylece çalışırlar)
             const scripts = tempDiv.querySelectorAll('script');
-            const scriptsToExecute = [];
             
-            scripts.forEach(oldScript => {
+            // Body'yi temizle
+            document.body.innerHTML = '';
+            
+            // Script olmayan içeriği ekle
+            const fragment = document.createDocumentFragment();
+            Array.from(tempDiv.childNodes).forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SCRIPT') {
+                    // Script'leri sonra ekleyeceğiz
+                    return;
+                }
+                fragment.appendChild(node.cloneNode(true));
+            });
+            document.body.appendChild(fragment);
+            
+            // Script'leri sırayla callback chain ile yükle
+            let currentIndex = 0;
+            
+            const loadNextScript = () => {
+                if (currentIndex >= scripts.length) return;
+                
+                const oldScript = scripts[currentIndex++];
                 const newScript = document.createElement('script');
                 
-                // Eğer src varsa, onu kullan (jQuery gibi)
-                if (oldScript.src) {
-                    newScript.src = oldScript.src;
-                    newScript.async = false; // Sıralı yükleme için
-                } else {
-                    // Inline script ise içeriği kopyala
-                    newScript.textContent = oldScript.textContent;
-                }
-                
-                // Diğer attribute'ları kopyala
+                // Tüm attribute'ları kopyala
                 Array.from(oldScript.attributes).forEach(attr => {
-                    if (attr.name !== 'src') {
-                        newScript.setAttribute(attr.name, attr.value);
-                    }
+                    newScript.setAttribute(attr.name, attr.value);
                 });
                 
-                scriptsToExecute.push(newScript);
-                oldScript.parentNode.removeChild(oldScript);
-            });
+                if (oldScript.src) {
+                    // External script - yüklenince bir sonrakini yükle
+                    newScript.onload = loadNextScript;
+                    newScript.onerror = loadNextScript;
+                } else {
+                    // Inline script
+                    newScript.textContent = oldScript.textContent;
+                    // Inline script'ler senkron çalışır, sonrakini tetikle
+                    setTimeout(loadNextScript, 0);
+                }
+                
+                document.body.appendChild(newScript);
+            };
             
-            // Body'yi temizle ve yeni içeriği ekle
-            document.body.innerHTML = '';
-            document.body.appendChild(tempDiv);
-            
-            // Script'leri sırayla ekle
-            scriptsToExecute.forEach(script => {
-                document.body.appendChild(script);
-            });
+            // İlk script'i yükle
+            loadNextScript();
             
         } catch (error) {
             console.error("Encrypted payload could not be decrypted", error);
