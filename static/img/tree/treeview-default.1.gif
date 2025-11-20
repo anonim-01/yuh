@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="48" viewBox="0 0 96 48">
+  <!-- Plus icon at position -64, -23 -->
+  <g transform="translate(64, 23)">
+    <rect width="9" height="9" fill="#fff" stroke="#999"/>
+    <path d="M2,4.5h5M4.5,2v5" stroke="#333" stroke-width="1" fill="none"/>
+  </g>
+  <!-- Other tree icons can be added here -->
+</svg>
