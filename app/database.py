@@ -194,10 +194,13 @@ def _row_to_dict(row: Union[sqlite3.Row, dict[str, Any], Any, None]) -> dict[str
         # Convert row-like objects to dict with explicit typing
         result: dict[str, Any] = {}
         if hasattr(row, 'keys') and callable(row.keys):
-            keys = list(row.keys())  # Iterator'ı listeye çevir
-            for key in keys:
-                result[str(key)] = row[key]
-            return result
+            keys_result = row.keys()
+            # Type guard: ensure keys is iterable
+            if hasattr(keys_result, '__iter__'):
+                keys = list(keys_result)  # type: ignore[arg-type]
+                for key in keys:
+                    result[str(key)] = row[key]
+                return result
         return dict(row)  # type: ignore[call-overload]
     except (TypeError, ValueError):
         return {}
@@ -227,11 +230,39 @@ def get_connection() -> Union[sqlite3.Connection, Any]:
     return connection
 
 
+class CursorWrapper:
+    """
+    Wraps a database cursor to handle PostgreSQL placeholder conversion.
+    SQLite uses '?' placeholders, PostgreSQL uses '%s'.
+    """
+    def __init__(self, cursor: Any):
+        self._cursor = cursor
+    
+    def execute(self, query: str, params: Any = None):
+        """Execute query with automatic placeholder conversion."""
+        if USING_POSTGRES:
+            query = query.replace("?", "%s")
+        if params is None:
+            return self._cursor.execute(query)
+        return self._cursor.execute(query, params)
+    
+    def fetchone(self):
+        return self._cursor.fetchone()
+    
+    def fetchall(self):
+        return self._cursor.fetchall()
+    
+    def __getattr__(self, name: str) -> Any:
+        """Forward all other attributes to the wrapped cursor."""
+        return getattr(self._cursor, name)
+
+
 @contextmanager
-def get_cursor() -> Generator[sqlite3.Cursor, None, None]:
+def get_cursor() -> Generator[Any, None, None]:
     connection = get_connection()
     try:
-        cursor = connection.cursor()
+        raw_cursor = connection.cursor()
+        cursor = CursorWrapper(raw_cursor)
         yield cursor
         connection.commit()
     finally:
