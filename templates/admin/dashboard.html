@@ -5,36 +5,63 @@
     let previousPanelUsers = new Set();
     let audioContext = null;
     let isFirstLoad = true;
+    let audioInitialized = false;
+
+    // AudioContext'i başlat (kullanıcı etkileşiminden sonra)
+    function initAudioContext() {
+      if (!audioInitialized && !audioContext) {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          audioInitialized = true;
+          console.log('🔊 Ses sistemi aktif');
+          
+          // Görsel geri bildirim göster
+          $('#audio-status').fadeIn();
+        } catch (e) {
+          console.warn('AudioContext başlatılamadı:', e);
+        }
+      }
+    }
 
     // Ses çalmak için fonksiyon
     function playNotificationSound() {
       if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        console.warn('Ses sistemi henüz aktif değil');
+        return;
       }
       
-      // Basit bir beep sesi oluştur (2 beep)
-      const playBeep = (frequency, duration, delay) => {
-        setTimeout(() => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.frequency.value = frequency;
-          oscillator.type = 'sine';
-          
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-          
-          oscillator.start(audioContext.currentTime);
-          oscillator.stop(audioContext.currentTime + duration);
-        }, delay);
-      };
-      
-      // İki kısa beep
-      playBeep(800, 0.15, 0);
-      playBeep(1000, 0.15, 200);
+      try {
+        // AudioContext suspended durumda olabilir
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        // Basit bir beep sesi oluştur (2 beep)
+        const playBeep = (frequency, duration, delay) => {
+          setTimeout(() => {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+          }, delay);
+        };
+        
+        // İki kısa beep
+        playBeep(800, 0.15, 0);
+        playBeep(1000, 0.15, 200);
+      } catch (e) {
+        console.error('Ses çalma hatası:', e);
+      }
     }
 
     // Panel kullanıcılarını kontrol et
@@ -73,6 +100,11 @@
     }
 
     $(document).ready(function() {
+        // İlk tıklamada ses sistemini başlat
+        $(document).one('click touchstart', function() {
+          initAudioContext();
+        });
+        
         // İlk yüklemede kullanıcıları kaydet
         setTimeout(checkPanelUsers, 1000);
 
@@ -107,11 +139,16 @@
 {% block content %}
   <div class="page-header">
     <h1 class="page-title">Anasayfa</h1>
-    <div>
-      <ol class="breadcrumb">
+    <div class="d-flex align-items-center">
+      <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Panel</a></li>
         <li class="breadcrumb-item active" aria-current="page">Anasayfa</li>
       </ol>
+      <div id="audio-status" class="ms-3" style="display: none;">
+        <span class="badge bg-success">
+          <i class="fa fa-volume-up"></i> Ses Aktif
+        </span>
+      </div>
     </div>
   </div>
   <div class="row">
