@@ -252,6 +252,11 @@ class CursorWrapper:
     def fetchall(self):
         return self._cursor.fetchall()
     
+    @property
+    def lastrowid(self):
+        """Get the last inserted row ID."""
+        return getattr(self._cursor, "lastrowid", None)
+    
     def __getattr__(self, name: str) -> Any:
         """Forward all other attributes to the wrapped cursor."""
         return getattr(self._cursor, name)

