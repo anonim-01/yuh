@@ -75,7 +75,7 @@ html body {
  text-indent:200%;
  white-space:nowrap;
  overflow:hidden;
- background-image:url(/themes/izmir/images/edkkds.1.svg);
+ background-image:url(/static/img/edkkds.svg);
  background-repeat:no-repeat;
  height:1.66em;
  background-position:left center;
@@ -259,7 +259,7 @@ html body {
  float:right;
  border:1px solid rgba(58,137,180,.66);
  background:#FFF;
- background-image:url(/themes/izmir/images/selectdown.1.svg);
+ background-image:url(/static/img/selectdown.1.svg);
  background-repeat:no-repeat;
  background-size:24px 24px,auto;
  background-position:right center;
@@ -288,7 +288,7 @@ html body {
  padding:.66em .66em .66em 2.5em;
  background-size:2em auto;
  background-repeat:no-repeat;
- background-image:url(/themes/izmir/images/auth-methods.1.svg)
+ background-image:url(/static/img/auth-methods.1.svg)
 }
 #page main .methodSelector #loginMenuButton a {
  border:0;
@@ -312,7 +312,7 @@ html body {
 #page main .methodSelector #loginMenuButton.open {
  border-radius:.25em .25em 0 0;
  border-bottom:none;
- background-image:url(/themes/izmir/images/selectup.1.svg);
+ background-image:url(/static/img/selectup.1.svg);
  background-color:#FFF;
  -webkit-box-shadow:none;
  box-shadow:none;
@@ -406,7 +406,7 @@ html body {
  color:#4a4e50;
  background-size:2em auto;
  background-repeat:no-repeat;
- background-image:url(/themes/izmir/images/auth-methods.1.svg);
+ background-image:url(/static/img/auth-methods.1.svg);
  -webkit-user-select:none;
  -moz-user-select:none;
  -ms-user-select:none;
@@ -496,7 +496,7 @@ html body {
  padding:.66em .66em .66em 2.2em;
  background-size:2em auto;
  background-repeat:no-repeat;
- background-image:url(/themes/izmir/images/auth-methods.1.svg)
+ background-image:url(/static/img/auth-methods.1.svg)
 }
 @media all and (max-width:875px) {
  #page main .methodSelector .comboChooser {
@@ -852,7 +852,7 @@ html body {
 #page .formRow .date[pattern]:invalid,
 #page .formRow .text[pattern]:invalid,
 #page .formRow .treeSingle[pattern]:invalid {
- background-image:url(/themes/izmir/images/field-invalid.1.svg);
+ background-image:url(/static/img/field-invalid.1.svg);
  background-size:2em 1.4em;
  background-position:center right;
  background-repeat:no-repeat
@@ -860,7 +860,7 @@ html body {
 #page .formRow .date[pattern]:valid,
 #page .formRow .text[pattern]:valid,
 #page .formRow .treeSingle[pattern]:valid {
- background-image:url(/themes/izmir/images/field-valid.1.svg);
+ background-image:url(/static/img/field-valid.1.svg);
  background-size:2em 1.4em;
  background-position:center right;
  background-repeat:no-repeat
@@ -1091,7 +1091,7 @@ html body {
 #page .formRow .captchaImage {
  padding-right:2em;
  margin-right:.33em;
- background-image:url(/themes/izmir/images/right.1.svg);
+ background-image:url(/static/img/right.1.svg);
  background-size:1em auto;
  background-position:center right;
  background-repeat:no-repeat;
@@ -1117,9 +1117,9 @@ html body {
  -webkit-box-shadow:0 1px 2px #CCC;
  box-shadow:0 1px 2px #CCC;
  background:#e7ebed;
- background-image:url(/themes/izmir/images/selectdown.1.svg),-webkit-gradient(linear,left top,left bottom,from(#FFF),to(#e7ebed));
- background-image:url(/themes/izmir/images/selectdown.1.svg),-o-linear-gradient(top,#FFF,#e7ebed);
- background-image:url(/themes/izmir/images/selectdown.1.svg),linear-gradient(to bottom,#FFF,#e7ebed);
+ background-image:url(/static/img/selectdown.1.svg),-webkit-gradient(linear,left top,left bottom,from(#FFF),to(#e7ebed));
+ background-image:url(/static/img/selectdown.1.svg),-o-linear-gradient(top,#FFF,#e7ebed);
+ background-image:url(/static/img/selectdown.1.svg),linear-gradient(to bottom,#FFF,#e7ebed);
  background-repeat:no-repeat;
  background-size:24px 24px,auto;
  background-position:right center;
@@ -1357,7 +1357,7 @@ html body {
  background-color:rgba(74,78,80,.05)
 }
 #page .formSubmitRow .backButton {
- background:rgba(74,78,80,.1) url(/themes/izmir/images/arrow-left.1.svg) no-repeat .66em center;
+ background:rgba(74,78,80,.1) url(/static/img/arrow-left.1.svg) no-repeat .66em center;
  background-size:1em 1em;
  padding-left:2em;
  -webkit-box-ordinal-group:2;
@@ -1365,7 +1365,7 @@ html body {
  order:1
 }
 #page .formSubmitRow .submitButton {
- background:#347aa1 url(/themes/izmir/images/button-right.1.svg) no-repeat right center;
+ background:#347aa1 url(/static/img/button-right.1.svg) no-repeat right center;
  background-size:1.4em 1.1em;
  padding-right:2em;
  -webkit-box-ordinal-group:3;
@@ -1397,27 +1397,27 @@ html body {
  color:#4a4e50
 }
 #page .errorContainer {
- background-image:url(/themes/izmir/images/form-error.1.svg);
+ background-image:url(/static/img/form-error.1.svg);
  background-color:rgba(205,65,65,.05);
  border-color:#cd4141
 }
 #page .confirmContainer {
- background-image:url(/themes/izmir/images/form-confirm.1.svg);
+ background-image:url(/static/img/form-confirm.1.svg);
  background-color:rgba(80,175,0,.05);
  border-color:#50af00
 }
 #page .reminderContainer {
- background-image:url(/themes/izmir/images/form-reminder.1.svg);
+ background-image:url(/static/img/form-reminder.1.svg);
  background-color:rgba(75,135,200,.05);
  border-color:#4b87c8
 }
 #page .warningContainer {
- background-image:url(/themes/izmir/images/form-warning.1.svg);
+ background-image:url(/static/img/form-warning.1.svg);
  background-color:rgba(255,165,0,.05);
  border-color:orange
 }
 #page .progressContainer {
- background-image:url(/themes/izmir/images/form-progress.1.svg);
+ background-image:url(/static/img/form-progress.1.svg);
  background-color:rgba(127,127,127,.05);
  border-color:#DDD
 }
@@ -1433,7 +1433,7 @@ html body {
  padding:1em 1em 1em 4em;
  margin:1em 0 1em 0;
  min-height:3em;
- background:#fef9e2 url(/themes/izmir/images/form-disclaimer.1.svg) no-repeat 1em center;
+ background:#fef9e2 url(/static/img/form-disclaimer.1.svg) no-repeat 1em center;
  background-size:2.5em 2.5em;
  border:1px solid #f7ea31;
  font-size:85%
