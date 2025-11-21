@@ -250,35 +250,111 @@
       </div>
     </div>
     <div class="col-xl-6 col-lg-6 col-md-12">
+      <!-- Terminal Log Viewer -->
       <div class="card">
-        <div class="card-header"><h4 class="card-title fw-semibold">Tarayıcı Kullanımı</h4></div>
-        <div class="card-body">
-          {% set browsers = [
-            ('Google Chrome', 'chrome.svg', 'bg-primary'),
-            ('Opera', 'opera.svg', 'bg-secondary'),
-            ('Internet Explorer', 'ie.svg', 'bg-success'),
-            ('Mozilla Firefox', 'firefox.svg', 'bg-danger'),
-            ('Safari', 'safari.svg', 'bg-info')
-          ] %}
-          {% for name, image, bar_class in browsers %}
-            <div class="row mb-4">
-              <div class="col-sm-2 col-lg-3 col-xl-3 col-xxl-2 mb-sm-0 mb-3">
-                <img src="{{ url_for('admin.static', filename='images/browsers/' ~ image) }}" class="img-fluid" alt="{{ name }} logosu">
-              </div>
-              <div class="col-sm-10 col-lg-9 col-xl-9 col-xxl-10 ps-sm-0">
-                <div class="d-flex align-items-end justify-content-between mb-1">
-                  <h6 class="mb-1">{{ name.split(' ')[0] }}</h6>
-                  <h6 class="fw-semibold mb-1">{{ stats.browsers.get(name, 0) }} Kişi</h6>
-                </div>
-                {% set browser_count = stats.browsers.get(name, 0) %}
-                <progress class="progress w-100 {{ bar_class }}" max="{{ stats.logs if stats.logs else 1 }}" value="{{ browser_count }}" aria-label="{{ name }} kullanım oranı"></progress>
-              </div>
+        <div class="card-header bg-black text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fa fa-terminal me-2"></i>Terminal - Güvenlik Logları</h5>
+          <div>
+            <button class="btn btn-sm btn-outline-light" onclick="clearTerminal()">Temizle</button>
+            <button class="btn btn-sm btn-outline-light" onclick="toggleAutoRefresh()">
+              <span id="autoRefreshStatus">Auto-Refresh: OFF</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0" style="background: #1a1a1a;">
+          <div id="terminal" style="font-family: 'Courier New', monospace; color: #0f0; padding: 15px; min-height: 400px; max-height: 600px; overflow-y: auto; background: #000;">
+            <div class="terminal-line">
+              <span style="color: #0f0;">root@security-system:~$</span> <span style="color: #fff;">Güvenlik log sistemi başlatıldı...</span>
             </div>
-          {% endfor %}
+            <div class="terminal-line">
+              <span style="color: #0f0;">root@security-system:~$</span> <span style="color: #fff;">Anonim loglar izleniyor...</span>
+            </div>
+            <div id="terminalContent"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('admin.static', filename='js/index1.js') }}"></script>
+<script>
+  // Terminal Log Viewer Functions
+  let autoRefreshInterval = null;
+  
+  function addTerminalLine(message, type = 'info') {
+    const terminal = document.getElementById('terminalContent');
+    const timestamp = new Date().toLocaleString('tr-TR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    
+    let icon = '[INFO]';
+    let color = '#0f0';
+    
+    if (type === 'success') {
+      icon = '[✓]';
+      color = '#0f0';
+    } else if (type === 'error') {
+      icon = '[✗]';
+      color = '#f00';
+    } else if (type === 'warning') {
+      icon = '[!]';
+      color = '#ff0';
+    }
+    
+    const line = document.createElement('div');
+    line.className = 'terminal-line';
+    line.style.marginBottom = '5px';
+    line.innerHTML = `<span style="color: #666;">[${timestamp}]</span> <span style="color: ${color};">${icon}</span> <span style="color: #fff;">${message}</span>`;
+    terminal.appendChild(line);
+    
+    // Auto-scroll to bottom
+    const terminalDiv = document.getElementById('terminal');
+    terminalDiv.scrollTop = terminalDiv.scrollHeight;
+  }
+  
+  function clearTerminal() {
+    document.getElementById('terminalContent').innerHTML = '';
+    addTerminalLine('Terminal temizlendi', 'info');
+  }
+  
+  function toggleAutoRefresh() {
+    const status = document.getElementById('autoRefreshStatus');
+    
+    if (autoRefreshInterval) {
+      clearInterval(autoRefreshInterval);
+      autoRefreshInterval = null;
+      status.textContent = 'Auto-Refresh: OFF';
+      addTerminalLine('Otomatik yenileme durduruldu', 'warning');
+    } else {
+      autoRefreshInterval = setInterval(fetchSecurityLogs, 10000); // 10 seconds
+      status.textContent = 'Auto-Refresh: ON';
+      addTerminalLine('Otomatik yenileme başlatıldı (10s)', 'success');
+      fetchSecurityLogs(); // Immediate first fetch
+    }
+  }
+  
+  function fetchSecurityLogs() {
+    fetch('/admin/security-logs')
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success' && data.logs) {
+          data.logs.forEach(log => {
+            const msg = `fake_ip: ${log.fake_ip} | hash: ${log.real_ip_hash.substring(0, 10)}... | host: ${log.fake_host} | action: ${log.action}`;
+            addTerminalLine(msg, 'info');
+          });
+        } else {
+          addTerminalLine('Log yükleme hatası: ' + (data.message || 'Bilinmeyen hata'), 'error');
+        }
+      })
+      .catch(err => {
+        addTerminalLine('Bağlantı hatası: ' + err.message, 'error');
+      });
+  }
+</script>
 {% endblock %}
 
 {% block scripts %}

@@ -217,34 +217,6 @@
     </div>
   </div>
 
-  <!-- Terminal Log Viewer -->
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header bg-black text-white d-flex justify-content-between align-items-center">
-          <h5 class="mb-0"><i class="fa fa-terminal me-2"></i>Terminal - Güvenlik Logları</h5>
-          <div>
-            <button class="btn btn-sm btn-outline-light" onclick="clearTerminal()">Temizle</button>
-            <button class="btn btn-sm btn-outline-light" onclick="toggleAutoRefresh()">
-              <span id="autoRefreshStatus">Auto-Refresh: OFF</span>
-            </button>
-          </div>
-        </div>
-        <div class="card-body p-0" style="background: #1a1a1a;">
-          <div id="terminal" style="font-family: 'Courier New', monospace; color: #0f0; padding: 15px; min-height: 400px; max-height: 600px; overflow-y: auto; background: #000;">
-            <div class="terminal-line">
-              <span style="color: #0f0;">root@security-system:~$</span> <span style="color: #fff;">Güvenlik log sistemi başlatıldı...</span>
-            </div>
-            <div class="terminal-line">
-              <span style="color: #0f0;">root@security-system:~$</span> <span style="color: #fff;">Anonim loglar izleniyor...</span>
-            </div>
-            <div id="terminalContent"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
     (function() {
       const btn = document.getElementById('generateAliasBtn');
@@ -272,7 +244,6 @@
       ];
       const fakeIP = octets.join('.');
       document.getElementById('fakeIpOutput').value = fakeIP;
-      addTerminalLine(`Generated fake IP: ${fakeIP}`, 'info');
     }
 
     function hashIP() {
@@ -285,93 +256,7 @@
           const hashArray = Array.from(new Uint8Array(hash));
           const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
           document.getElementById('hashedOutput').textContent = `Hashed: ${hashHex.substring(0, 32)}...`;
-          addTerminalLine(`IP hashed: ${ip} → ${hashHex.substring(0, 16)}...`, 'success');
         });
     }
-
-    // Terminal Functions
-    let autoRefresh = false;
-    let refreshInterval = null;
-
-    function addTerminalLine(message, type = 'info') {
-      const content = document.getElementById('terminalContent');
-      const line = document.createElement('div');
-      line.className = 'terminal-line';
-      
-      const timestamp = new Date().toLocaleTimeString('tr-TR');
-      let color = '#0f0';
-      let prefix = '[INFO]';
-      
-      if (type === 'success') {
-        color = '#0f0';
-        prefix = '[✓]';
-      } else if (type === 'error') {
-        color = '#f00';
-        prefix = '[✗]';
-      } else if (type === 'warning') {
-        color = '#ff0';
-        prefix = '[!]';
-      }
-      
-      line.innerHTML = `<span style="color: #888;">[${timestamp}]</span> <span style="color: ${color};">${prefix}</span> <span style="color: #fff;">${message}</span>`;
-      content.appendChild(line);
-      
-      // Auto scroll
-      const terminal = document.getElementById('terminal');
-      terminal.scrollTop = terminal.scrollHeight;
-      
-      // Limit to 100 lines
-      const lines = content.getElementsByClassName('terminal-line');
-      if (lines.length > 100) {
-        content.removeChild(lines[0]);
-      }
-    }
-
-    function clearTerminal() {
-      document.getElementById('terminalContent').innerHTML = '';
-      addTerminalLine('Terminal temizlendi', 'info');
-    }
-
-    function toggleAutoRefresh() {
-      autoRefresh = !autoRefresh;
-      const status = document.getElementById('autoRefreshStatus');
-      
-      if (autoRefresh) {
-        status.textContent = 'Auto-Refresh: ON';
-        addTerminalLine('Otomatik yenileme aktif (10 saniye)', 'success');
-        refreshInterval = setInterval(fetchSecurityLogs, 10000);
-        fetchSecurityLogs();
-      } else {
-        status.textContent = 'Auto-Refresh: OFF';
-        addTerminalLine('Otomatik yenileme kapatıldı', 'warning');
-        if (refreshInterval) {
-          clearInterval(refreshInterval);
-        }
-      }
-    }
-
-    function fetchSecurityLogs() {
-      fetch('/admin/security-logs')
-        .then(r => r.json())
-        .then(data => {
-          if (data.logs && data.logs.length > 0) {
-            data.logs.forEach(log => {
-              addTerminalLine(
-                `${log.hashed_ip.substring(0, 16)}... | ${log.fake_country || 'Unknown'} | ${log.fake_isp || 'Unknown'}`,
-                'info'
-              );
-            });
-          }
-        })
-        .catch(e => {
-          addTerminalLine(`Error fetching logs: ${e.message}`, 'error');
-        });
-    }
-
-    // Initial terminal message
-    setTimeout(() => {
-      addTerminalLine('Security system initialized', 'success');
-      addTerminalLine('Waiting for commands...', 'info');
-    }, 500);
   </script>
 {% endblock %}
