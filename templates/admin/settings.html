@@ -129,7 +129,7 @@
                       <td><code>{{ alias.masked_host }}</code></td>
                       <td>
                         <div class="input-group">
-                          <input type="text" class="form-control" value="{{ alias.masked_url }}" readonly onclick="this.select()">
+                          <input type="text" class="form-control" value="{{ alias.masked_url }}" readonly onclick="this.select()" aria-label="Maskelenmiş URL" title="Seçmek için tıklayın">
                           <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ alias.masked_url }}')">Kopyala</button>
                         </div>
                       </td>
