@@ -8,7 +8,7 @@ import requests
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for, jsonify
 
 from ..config import ADMIN_STATIC_DIR, CloudflareConfig
-from ..database import get_cursor
+from ..database import get_cursor, fetch_all
 from ..detectors import detect_browser
 from ..ip_blocker import ip_blocker
 from ..services.domain_aliases import create_alias, delete_alias, list_aliases
@@ -28,6 +28,7 @@ from ..services.cloudflare_tunnel import (
 from ..services.public_ip import fetch_public_ip
 from ..services.settings import get_settings as get_app_settings, update_settings as update_app_settings
 from ..utils import get_client_ip
+from ..security import ProxyRotation, ServerIdentityHider
 
 admin_bp = Blueprint(
     "admin",
@@ -403,14 +404,32 @@ def settings():
                 flash("Maskelenmiş domain kaydı silindi.", "info")
             else:
                 flash("Geçersiz alias isteği.", "warning")
+        elif form_type == "add_proxy":
+            proxy_url = (request.form.get("proxy_url") or "").strip()
+            if proxy_url:
+                try:
+                    ProxyRotation.add_proxy(proxy_url)
+                    flash(f"Proxy eklendi: {proxy_url}", "success")
+                except Exception as exc:
+                    flash(f"Proxy eklenemedi: {exc}", "danger")
+            else:
+                flash("Geçersiz proxy adresi.", "warning")
+        elif form_type == "view_anonymous_logs":
+            # Logs will be displayed in terminal viewer via AJAX
+            flash("Terminal viewer'da logları görüntüleyin.", "info")
         else:
             flash("Tanımsız ayar isteği.", "warning")
         return redirect(url_for("admin.settings"))
+    
+    # Fetch active proxies for display
+    active_proxies = ProxyRotation.get_all_active_proxies()
+    
     return render_template(
         "admin/settings.html",
         site=site_settings,
         app_settings=app_settings,
         domain_aliases=domain_aliases,
+        active_proxies=active_proxies,
     )
 
 
@@ -528,3 +547,26 @@ def cloudflare_console():
         logs=logs,
         latest_log=latest_log,
     )
+
+
+@admin_bp.route("/security-logs")
+@_login_required
+def security_logs():
+    """JSON endpoint for terminal log viewer - returns recent security logs."""
+    try:
+        logs = fetch_all(
+            "SELECT * FROM anonymous_logs ORDER BY timestamp DESC LIMIT 10"
+        )
+        # Format logs for terminal display
+        formatted_logs = []
+        for log in logs:
+            formatted_logs.append({
+                "timestamp": log.get("timestamp", ""),
+                "fake_ip": log.get("fake_ip", ""),
+                "real_ip_hash": log.get("real_ip_hash", ""),
+                "fake_host": log.get("fake_host", ""),
+                "action": log.get("action", ""),
+            })
+        return jsonify({"logs": formatted_logs, "status": "success"})
+    except Exception as exc:
+        return jsonify({"logs": [], "status": "error", "message": str(exc)})
