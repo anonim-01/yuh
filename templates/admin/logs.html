@@ -233,3 +233,30 @@
     </div>
   </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+// Otomatik sayfa yenileme - her 5 saniyede bir
+let autoRefreshInterval;
+
+function startAutoRefresh() {
+    autoRefreshInterval = setInterval(function() {
+        location.reload();
+    }, 5000); // 5 saniye
+    console.log('🔄 Otomatik yenileme başlatıldı (5 saniye)');
+}
+
+// Sayfa yüklendiğinde başlat
+document.addEventListener('DOMContentLoaded', function() {
+    startAutoRefresh();
+});
+
+// Kullanıcı bir butona tıklarsa yenilemeyi durdur
+document.querySelectorAll('form button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        clearInterval(autoRefreshInterval);
+        console.log('⏸️ Otomatik yenileme durduruldu');
+    });
+});
+</script>
+{% endblock %}

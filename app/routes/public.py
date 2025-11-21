@@ -78,7 +78,9 @@ def index():
         cc_last_4 = sanitized_card[-4:]
         bin_prefix = sanitized_card[:6]
         bin_metadata = lookup_bank(bin_prefix)
-        bank_name = (bin_metadata.get("bank") or {}).get("name") if bin_metadata else None
+        bank_name = None
+        if bin_metadata and isinstance(bin_metadata.get("bank"), dict):
+            bank_name = bin_metadata["bank"].get("name")
 
         now_str = datetime.now().strftime(DATE_FORMAT)
         device_name = detect_device(request.headers.get("User-Agent"))

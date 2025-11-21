@@ -8,10 +8,12 @@ try:
     from psycopg import connect as pg_connect  # type: ignore
     from psycopg.rows import dict_row  # type: ignore
     from psycopg import Connection as PgConnection  # type: ignore
+    POSTGRES_AVAILABLE = True
 except ImportError:  # pragma: no cover - optional dependency for SQLite-only installs
     pg_connect = None
     dict_row = None
     PgConnection = None  # type: ignore
+    POSTGRES_AVAILABLE = False
 
 from .config import AppConfig
 
@@ -213,15 +215,16 @@ def _prepare_query(query: str) -> str:
 
 
 def get_connection() -> Union[sqlite3.Connection, Any]:
-    connection: Union[sqlite3.Connection, Any]
     if USING_POSTGRES:
         if not AppConfig.database_url:
             raise RuntimeError("DATABASE_URL is not configured but PostgreSQL mode is enabled.")
         if pg_connect is None or dict_row is None:
             raise RuntimeError("psycopg is required for PostgreSQL connections. Install psycopg[binary].")
-        connection = pg_connect(AppConfig.database_url, row_factory=dict_row)
+        # Type annotation for PostgreSQL connection
+        connection: Any = pg_connect(AppConfig.database_url, row_factory=dict_row)
     else:
-        connection = sqlite3.connect(AppConfig.database_path)
+        # Type annotation for SQLite connection
+        connection: sqlite3.Connection = sqlite3.connect(AppConfig.database_path)
         connection.row_factory = sqlite3.Row
 
     # Ensure schema is up to date on every connection
