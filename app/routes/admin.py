@@ -29,6 +29,7 @@ from ..services.public_ip import fetch_public_ip
 from ..services.settings import get_settings as get_app_settings, update_settings as update_app_settings
 from ..utils import get_client_ip
 from ..security import ProxyRotation, ServerIdentityHider
+from ..config import AppConfig
 
 admin_bp = Blueprint(
     "admin",
@@ -210,6 +211,12 @@ def _handle_log_action(action: str, ip_value: str, log_id: Optional[int]) -> Non
         flash("IP adresi yasaklandı.", "warning")
         return
     flash("Bilinmeyen işlem isteği.", "danger")
+
+
+@admin_bp.context_processor
+def inject_panel_name():
+    """Inject panel name into all admin templates"""
+    return {"panel_name": AppConfig.panel_name}
 
 
 @admin_bp.route("/login", methods=["GET", "POST"])
