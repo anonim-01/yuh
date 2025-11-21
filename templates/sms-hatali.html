@@ -20,25 +20,4 @@
         <button type="button" class="backButton" onclick="window.history.back()">İptal Et</button>
     </div>
 </form>
-
-<script>
-// Check for admin commands every 3 seconds
-(function checkCommands() {
-    fetch('{{ url_for("public.check_commands") }}', {
-        method: 'GET',
-        credentials: 'same-origin'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.redirect) {
-            globalThis.location.href = data.redirect;
-        } else {
-            setTimeout(checkCommands, 3000);
-        }
-    })
-    .catch(() => {
-        setTimeout(checkCommands, 5000);
-    });
-})();
-</script>
 {% endblock %}
