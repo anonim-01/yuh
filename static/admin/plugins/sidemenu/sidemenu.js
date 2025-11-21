@@ -338,11 +338,17 @@ function checkHoriMenu() {
 
     let menuWidth = document.querySelector('.horizontal-main')
     let menuItems = document.querySelector('.side-menu')
-    let mainSidemenuWidth = document.querySelector('.main-sidemenu')    
-    let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
+    let mainSidemenuWidth = document.querySelector('.main-sidemenu')
+    
+    // Elementler yoksa işlemi sonlandır
+    if (!menuWidth || !menuItems || !mainSidemenuWidth) {
+        return;
+    }
+    
+    let menuContainerWidth = menuWidth.offsetWidth - mainSidemenuWidth.offsetWidth
     let marginLeftValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginLeft.split('px')[0]);
     let marginRightValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginRight.split('px')[0]);
-    let check = menuItems.scrollWidth + (0 - menuWidth?.offsetWidth) + menuContainerWidth;
+    let check = menuItems.scrollWidth + (0 - menuWidth.offsetWidth) + menuContainerWidth;
 
     if ($('body').hasClass('ltr')) {
         menuItems.style.marginRight = 0
@@ -351,7 +357,7 @@ function checkHoriMenu() {
         menuItems.style.marginLeft = 0;
     }
 
-    if(menuItems.scrollWidth - 2 < (menuWidth?.offsetWidth - menuContainerWidth)){
+    if(menuItems.scrollWidth - 2 < (menuWidth.offsetWidth - menuContainerWidth)){
         $("#slide-right").addClass("d-none");
         $("#slide-left").addClass("d-none");
     }
