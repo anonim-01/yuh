@@ -9,11 +9,16 @@ from .routes.binlookup import binlookup_bp
 from .routes.commands import commands_bp
 from .routes.public import public_bp
 from .services.settings import get_settings as get_app_settings
+from .security import init_security_tables
 
 
 def create_app() -> Flask:
     app = Flask(__name__, static_folder=str(STATIC_DIR), static_url_path="/assets", template_folder="../templates")
     app.config["SECRET_KEY"] = AppConfig.secret_key
+
+    # Initialize security tables
+    with app.app_context():
+        init_security_tables()
 
     # IP engelleme middleware'ini ekle
     app.before_request(check_ip_blocked)
