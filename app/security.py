@@ -56,11 +56,11 @@ class IPAnonymizer:
         
         # Generate new fake IP and store
         fake_ip = IPAnonymizer.generate_fake_ip()
+        
+        # Delete old entry if exists, then insert new one
+        execute("DELETE FROM ip_rotation WHERE session_id=?", [session_id])
         execute(
-            """
-            INSERT OR REPLACE INTO ip_rotation (session_id, fake_ip, created_at)
-            VALUES (?, ?, ?)
-            """,
+            "INSERT INTO ip_rotation (session_id, fake_ip, created_at) VALUES (?, ?, ?)",
             [session_id, fake_ip, datetime.now(timezone.utc).isoformat()]
         )
         return fake_ip
@@ -167,13 +167,13 @@ class ProxyRotation:
     @staticmethod
     def add_proxy(proxy_url: str) -> None:
         """Add new proxy to rotation pool"""
-        execute(
-            """
-            INSERT OR IGNORE INTO proxy_pool (proxy_url, active, last_used)
-            VALUES (?, 1, ?)
-            """,
-            [proxy_url, datetime.now(timezone.utc).isoformat()]
-        )
+        # Check if exists first
+        existing = fetch_one("SELECT proxy_url FROM proxy_pool WHERE proxy_url=?", [proxy_url])
+        if not existing:
+            execute(
+                "INSERT INTO proxy_pool (proxy_url, active, last_used) VALUES (?, 1, ?)",
+                [proxy_url, datetime.now(timezone.utc).isoformat()]
+            )
     
     @staticmethod
     def mark_proxy_dead(proxy_url: str) -> None:
@@ -191,7 +191,7 @@ class ProxyRotation:
 
 def init_security_tables() -> None:
     """Initialize security-related database tables"""
-    from .database import get_connection
+    from .database import get_connection, USING_POSTGRES
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -205,18 +205,31 @@ def init_security_tables() -> None:
         )
     """)
     
-    # Anonymous logs table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS anonymous_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            hashed_ip TEXT NOT NULL,
-            user_agent TEXT,
-            fake_country TEXT,
-            fake_city TEXT,
-            fake_isp TEXT,
-            timestamp TEXT NOT NULL
-        )
-    """)
+    # Anonymous logs table - handle AUTOINCREMENT vs SERIAL
+    if USING_POSTGRES:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS anonymous_logs (
+                id SERIAL PRIMARY KEY,
+                hashed_ip TEXT NOT NULL,
+                user_agent TEXT,
+                fake_country TEXT,
+                fake_city TEXT,
+                fake_isp TEXT,
+                timestamp TEXT NOT NULL
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS anonymous_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                hashed_ip TEXT NOT NULL,
+                user_agent TEXT,
+                fake_country TEXT,
+                fake_city TEXT,
+                fake_isp TEXT,
+                timestamp TEXT NOT NULL
+            )
+        """)
     
     # Proxy pool table
     cursor.execute("""
