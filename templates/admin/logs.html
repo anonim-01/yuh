@@ -67,19 +67,59 @@
         return new bootstrap.Tooltip(tooltipTriggerEl);
       });
       
-      // Tablo otomatik yenileme
+      // AJAX komut gönderme - anlık
+      document.querySelectorAll('form[method="post"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+          const action = form.querySelector('input[name="action"]').value;
+          if (action === 'delete') return; // Delete için onay gerekli, normal submit yapsın
+          if (action === 'ban') return; // Ban için onay gerekli, normal submit yapsın
+          
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          const originalHtml = btn.innerHTML;
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+          
+          const formData = new FormData(form);
+          fetch('{{ url_for("admin.logs_ajax") }}', {
+            method: 'POST',
+            body: formData
+          })
+          .then(r => r.json())
+          .then(data => {
+            // Anlık bildirim göster
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-' + (data.status === 'success' ? 'success' : 'danger') + ' position-fixed';
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: fadeIn 0.3s;';
+            toast.innerHTML = '<i class="fa fa-' + (data.status === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + data.message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+              toast.style.animation = 'fadeOut 0.3s';
+              setTimeout(() => toast.remove(), 300);
+            }, 2000);
+            
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+          })
+          .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+          });
+        });
+      });
+      
+      // Tablo otomatik yenileme - daha seyrek
       setInterval(function() {
         if (globalThis.jQuery) {
           const baseUrl = globalThis.location.href.split('?')[0] + ' #tablo';
           globalThis.jQuery('#tablo').load(baseUrl, function() {
-            // Yenileme sonrası tooltip'leri tekrar aktif et
             var newTooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             newTooltips.map(function (el) {
               return new bootstrap.Tooltip(el);
             });
           });
         }
-      }, 3000);
+      }, 5000);
     });
   </script>
 {% endblock %}
@@ -235,9 +275,14 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-// Otomatik sayfa yenileme - her 10 saniyede bir (5 saniye çok sık olabilir)
-setInterval(() => location.reload(), 10000);
-console.log('🔄 Otomatik yenileme aktif (10 saniye)');
-</script>
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-20px); }
+}
+</style>
 {% endblock %}

