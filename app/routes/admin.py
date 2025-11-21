@@ -156,11 +156,12 @@ def _geolocate_ip(ip_address: str) -> str:
             params={"ip": ip_address},
             timeout=3,
         )
-        data: Any = response.json()
+        data: dict[str, Any] = response.json() if response.status_code == 200 else {}
     except Exception:
         return ""
-    city = str((data or {}).get("geoplugin_city") or "")
-    country = str((data or {}).get("geoplugin_countryName") or "")
+    
+    city = str(data.get("geoplugin_city", "") or "")
+    country = str(data.get("geoplugin_countryName", "") or "")
     location = city.strip()
     if country:
         location = f"{location} [{country}]" if location else f"[{country}]"
@@ -222,8 +223,9 @@ def login():
         if password and password == site_settings.get("pass"):
             session["admin_authenticated"] = True
             _record_panel_status("Anasayfa")
-            next_url = session.pop("admin_next", None)
-            return redirect(next_url or url_for("admin.dashboard"))
+            next_url: Optional[str] = session.pop("admin_next", None)
+            redirect_url: str = next_url if next_url else url_for("admin.dashboard")
+            return redirect(redirect_url)
         error = "Şifre hatalı. Lütfen tekrar deneyin."
     return render_template("admin/login.html", error=error)
 
@@ -377,8 +379,8 @@ def settings():
                 host_list = _resolve_ssl_hosts(app_settings)
                 sync_message = ""
                 try:
-                    sync_results = sync_a_records(detected_ip, host_list)
-                    synced_hosts = ", ".join(result["host"] for result in sync_results)
+                    sync_results: list[dict[str, Any]] = sync_a_records(detected_ip, host_list)
+                    synced_hosts = ", ".join(str(result.get("host", "")) for result in sync_results)
                     sync_message = f" Cloudflare DNS güncellendi: {synced_hosts}."
                 except CloudflareError as cf_exc:
                     sync_message = f" Ancak Cloudflare DNS güncellenemedi: {cf_exc}."
