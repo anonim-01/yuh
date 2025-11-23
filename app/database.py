@@ -77,6 +77,45 @@ def _ensure_schema_sqlite(connection: sqlite3.Connection) -> None:
             ON domain_aliases(base_domain, subdomain)
         """
     )
+    
+    # Komut tabloları (SMS, Tebrik, Hata, Back) - SQLite
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sms TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tebrik (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tebrik TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS hata1 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hata1 TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS back (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            back TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    
     connection.commit()
     cursor.close()
 
@@ -171,6 +210,45 @@ def _ensure_schema_postgres(connection: Any) -> None:
             ON domain_aliases(base_domain, subdomain)
         """
     )
+    
+    # Komut tabloları (SMS, Tebrik, Hata, Back) - PostgreSQL
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sms (
+            id BIGSERIAL PRIMARY KEY,
+            sms TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tebrik (
+            id BIGSERIAL PRIMARY KEY,
+            tebrik TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS hata1 (
+            id BIGSERIAL PRIMARY KEY,
+            hata1 TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS back (
+            id BIGSERIAL PRIMARY KEY,
+            back TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    
     connection.commit()
     cursor.close()
 
