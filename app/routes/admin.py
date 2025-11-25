@@ -294,7 +294,7 @@ def logs_ajax():
     action = request.form.get("action")
     target_ip = request.form.get("target_ip")
     log_id = request.form.get("log_id")
-    log_id_int = int(log_id) if log_id and log_id.isdigit() else None
+    
     
     # Handle command
     if action in COMMAND_TABLES:
