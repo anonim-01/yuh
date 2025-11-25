@@ -1,11 +1,9 @@
 $(function(e) {
 
-    //flotChart1 - Define dashData10 if not exists
-    if (typeof dashData10 === 'undefined') {
-        var dashData10 = [];
-        for (var i = 0; i < 50; i++) {
-            dashData10.push([i, Math.floor(Math.random() * 100) + 20]);
-        }
+    //flotChart1 - Define dashData10
+    var dashData10 = [];
+    for (var i = 0; i < 50; i++) {
+        dashData10.push([i, Math.floor(Math.random() * 100) + 20]);
     }
     
     $.plot('#flotback-chart', [{
