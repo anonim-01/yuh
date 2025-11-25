@@ -7,12 +7,10 @@ from typing import Any, Generator, Optional, Sequence, Union
 try:
     from psycopg import connect as pg_connect  # type: ignore
     from psycopg.rows import dict_row  # type: ignore
-    from psycopg import Connection as PgConnection  # type: ignore
     POSTGRES_AVAILABLE = True
 except ImportError:  # pragma: no cover - optional dependency for SQLite-only installs
     pg_connect = None
     dict_row = None
-    PgConnection = None  # type: ignore
     POSTGRES_AVAILABLE = False
 
 from .config import AppConfig
