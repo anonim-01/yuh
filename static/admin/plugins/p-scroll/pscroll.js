@@ -3,7 +3,7 @@
 
     const element = document.querySelector('.app-sidebar');
     if (element) {
-        const ps = new PerfectScrollbar(element, {
+        new PerfectScrollbar(element, {
             useBothWheelAxes: true,
             suppressScrollX: true,
             suppressScrollY: false,
