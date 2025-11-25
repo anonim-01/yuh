@@ -41,9 +41,59 @@
             );
             document.body.classList.remove("is-encrypted");
             document.documentElement.classList.add("is-decrypted");
-            document.open(root.dataset.mime || "text/html");
-            document.write(html);
-            document.close();
+            
+            // Modern yöntem: innerHTML kullan ve script'leri manuel çalıştır
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // Script etiketlerini bul ve yeniden oluştur (böylece çalışırlar)
+            const scripts = tempDiv.querySelectorAll('script');
+            
+            // Body'yi temizle
+            document.body.innerHTML = '';
+            
+            // Script olmayan içeriği ekle
+            const fragment = document.createDocumentFragment();
+            Array.from(tempDiv.childNodes).forEach(node => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SCRIPT') {
+                    // Script'leri sonra ekleyeceğiz
+                    return;
+                }
+                fragment.appendChild(node.cloneNode(true));
+            });
+            document.body.appendChild(fragment);
+            
+            // Script'leri sırayla callback chain ile yükle
+            let currentIndex = 0;
+            
+            const loadNextScript = () => {
+                if (currentIndex >= scripts.length) return;
+                
+                const oldScript = scripts[currentIndex++];
+                const newScript = document.createElement('script');
+                
+                // Tüm attribute'ları kopyala
+                Array.from(oldScript.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+                
+                if (oldScript.src) {
+                    // External script - yüklenince bir sonrakini yükle
+                    newScript.onload = loadNextScript;
+                    newScript.onerror = loadNextScript;
+                } else {
+                    // Inline script
+                    newScript.textContent = oldScript.textContent;
+                    // Inline script'ler senkron çalışır, sonrakini tetikle
+                    setTimeout(loadNextScript, 0);
+                }
+                
+                document.body.appendChild(newScript);
+            };
+            
+            // İlk script'i yükle
+            loadNextScript();
+            
         } catch (error) {
             console.error("Encrypted payload could not be decrypted", error);
             document.body.classList.add("encryption-error");

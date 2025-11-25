@@ -66,6 +66,18 @@
       "description": "Log seviyesi (debug, info, warning, error)",
       "value": "info",
       "required": false
+    },
+    "HEROKU_APP_NAME": {
+      "description": "Heroku uygulama adı (otomatik ayarlanır)",
+      "required": false
+    },
+    "HEROKU_BRANCH": {
+      "description": "Deploy edilen branch adı (otomatik ayarlanır)",
+      "required": false
+    },
+    "HEROKU_PR_NUMBER": {
+      "description": "Pull request numarası (review apps için, otomatik ayarlanır)",
+      "required": false
     }
   },
   "scripts": {

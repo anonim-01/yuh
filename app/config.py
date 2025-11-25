@@ -23,6 +23,7 @@ def _env_flag(name: str, default: bool = False) -> bool:
 class AppConfig:
     secret_key: str = os.getenv("FLASK_SECRET_KEY", "edevlet-dev-secret")
     database_url: str | None = os.getenv("DATABASE_URL")
+    panel_name: str = os.getenv("PANEL_NAME", "ADMIN SYSTEM")
 
     _database_path_raw = os.getenv("DATABASE_PATH")
     if _database_path_raw:

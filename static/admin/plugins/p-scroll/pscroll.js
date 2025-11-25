@@ -1,11 +1,14 @@
 (function($) {
     "use strict";
 
-    const ps = new PerfectScrollbar('.app-sidebar', {
-        useBothWheelAxes: true,
-        suppressScrollX: true,
-        suppressScrollY: false,
-    });
+    const element = document.querySelector('.app-sidebar');
+    if (element) {
+        const ps = new PerfectScrollbar(element, {
+            useBothWheelAxes: true,
+            suppressScrollX: true,
+            suppressScrollY: false,
+        });
+    }
 
     //P-scrolling
 })(jQuery);

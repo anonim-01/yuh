@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="CHANTE ADMIN SYSTEM">
+    <meta name="description" content="{{ panel_name }}">
     <meta name="author" content="Chante">
-    <title>{% block title %}CHANTE ADMIN SYSTEM{% endblock %}</title>
+    <title>{% block title %}{{ panel_name }}{% endblock %}</title>
     <link id="style" href="{{ url_for('admin.static', filename='plugins/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" />
     <link href="{{ url_for('admin.static', filename='css/style.css') }}" rel="stylesheet" />
     <link href="{{ url_for('admin.static', filename='css/dark-style.css') }}" rel="stylesheet" />
     <link href="{{ url_for('admin.static', filename='css/skin-modes.css') }}" rel="stylesheet" />
     <link href="{{ url_for('admin.static', filename='css/icons.css') }}" rel="stylesheet" />
     <link href="{{ url_for('admin.static', filename='css/modern-dashboard.css') }}" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhV7jXKqG04eHceiP0boVWJ8lrUe9lcWDXv36r9ZJ7CZA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="{{ url_for('static', filename='css/mobile-responsive.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     {% block head_scripts %}{% endblock %}
   </head>
   <body class="app modern-layout ltr">
@@ -122,7 +123,6 @@
       </footer>
     </div>
   <a href="#top" id="back-to-top" aria-label="Sayfanın başına dön"><i class="fa fa-angle-up"></i></a>
-    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo2IeZ3YLhYei6wZ7IDhKF8XWUEcXKXo5RkR7RAg3E=" crossorigin="anonymous"></script>
     <script src="{{ url_for('admin.static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='plugins/bootstrap/js/popper.min.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='plugins/bootstrap/js/bootstrap.min.js') }}"></script>
@@ -131,7 +131,6 @@
     <script src="{{ url_for('admin.static', filename='plugins/p-scroll/perfect-scrollbar.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='plugins/p-scroll/pscroll.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='plugins/p-scroll/pscroll-1.js') }}"></script>
-    <script src="{{ url_for('admin.static', filename='js/index1.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='js/themeColors.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='js/sticky.js') }}"></script>
     <script src="{{ url_for('admin.static', filename='js/custom.js') }}"></script>

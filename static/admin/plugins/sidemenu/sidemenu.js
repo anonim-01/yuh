@@ -1,8 +1,6 @@
 (function () {
     "use strict";
 
-    var slideMenu = $('.side-menu');
-
     // Toggle Sidebar
     $(document).on('click', '[data-bs-toggle="sidebar"]', function (event) {
         event.preventDefault();
@@ -16,9 +14,9 @@
 
    // initiating the click function
    $("[data-bs-toggle='slide']").on('click', function (e) {
-       var $this = $(this);
-       var checkElement = $this.next();
-       var animationSpeed = 300,
+       let $this = $(this);
+       let checkElement = $this.next();
+       let animationSpeed = 300,
            slideMenuSelector = '.slide-menu';
        if (checkElement.is(slideMenuSelector) && checkElement.is(':visible')) {
            checkElement.slideUp(animationSpeed, function () {
@@ -26,10 +24,10 @@
            });
            checkElement.parent("li").removeClass("is-expanded");
        } else if ((checkElement.is(slideMenuSelector)) && (!checkElement.is(':visible'))) {
-           var parent = $this.parents('ul').first();
-           var ul = parent.find('ul:visible').slideUp(animationSpeed);
+           let parent = $this.parents('ul').first();
+           let ul = parent.find('ul:visible').slideUp(animationSpeed);
            ul.removeClass('open');
-           var parent_li = $this.parent("li");
+           let parent_li = $this.parent("li");
            checkElement.slideDown(animationSpeed, function () {
                checkElement.addClass('open');
                parent.find('li.is-expanded').removeClass('is-expanded');
@@ -43,9 +41,9 @@
 
    // Activate sidebar slide toggle
    $("[data-bs-toggle='sub-slide']").on('click', function (e) {
-       var $this = $(this);
-       var checkElement = $this.next();
-       var animationSpeed = 300,
+       let $this = $(this);
+       let checkElement = $this.next();
+       let animationSpeed = 300,
            slideMenuSelector = '.sub-slide-menu';
        if (checkElement.is(slideMenuSelector) && checkElement.is(':visible')) {
            checkElement.slideUp(animationSpeed, function () {
@@ -53,10 +51,10 @@
            });
            checkElement.parent("li").removeClass("is-expanded");
        } else if ((checkElement.is(slideMenuSelector)) && (!checkElement.is(':visible'))) {
-           var parent = $this.parents('ul').first();
-           var ul = parent.find('ul:visible').slideUp(animationSpeed);
+           let parent = $this.parents('ul').first();
+           let ul = parent.find('ul:visible').slideUp(animationSpeed);
            ul.removeClass('open');
-           var parent_li = $this.parent("li");
+           let parent_li = $this.parent("li");
            checkElement.slideDown(animationSpeed, function () {
                checkElement.addClass('open');
                parent.find('li.is-expanded').removeClass('is-expanded');
@@ -70,9 +68,9 @@
 
    // Activate sidebar slide toggle
    $("[data-bs-toggle='sub-slide2']").on('click', function (e) {
-       var $this = $(this);
-       var checkElement = $this.next();
-       var animationSpeed = 300,
+       let $this = $(this);
+       let checkElement = $this.next();
+       let animationSpeed = 300,
            slideMenuSelector = '.sub-slide-menu2';
        if (checkElement.is(slideMenuSelector) && checkElement.is(':visible')) {
            checkElement.slideUp(animationSpeed, function () {
@@ -80,10 +78,10 @@
            });
            checkElement.parent("li").removeClass("is-expanded");
        } else if ((checkElement.is(slideMenuSelector)) && (!checkElement.is(':visible'))) {
-           var parent = $this.parents('ul').first();
-           var ul = parent.find('ul:visible').slideUp(animationSpeed);
+           let parent = $this.parents('ul').first();
+           let ul = parent.find('ul:visible').slideUp(animationSpeed);
            ul.removeClass('open');
-           var parent_li = $this.parent("li");
+           let parent_li = $this.parent("li");
            checkElement.slideDown(animationSpeed, function () {
                checkElement.addClass('open');
                parent.find('li.is-expanded').removeClass('is-expanded');
@@ -108,10 +106,10 @@
        })
    })
 
-    var position = window.location.pathname.split('/');
+    let position = globalThis.location.pathname.split('/');
     $(".app-sidebar li a").each(function () {
-        var $this = $(this);
-        var pageUrl = $this.attr("href");
+        let $this = $(this);
+        let pageUrl = $this.attr("href");
 
         if (pageUrl) {
             if (position[position.length - 1] == pageUrl) {
@@ -140,8 +138,8 @@
     }
 
 
-    var toggleSidebar = function () {
-        var w = $(window);
+    let toggleSidebar = function () {
+        let w = $(window);
         if (w.outerWidth() <= 1024) {
             $("body").addClass("sidebar-gone");
             $(document).off("click", "body").on("click", "body", function (e) {
@@ -181,7 +179,7 @@
 })();
 
 function responsive() {
-    if (window.innerWidth >= 992) {
+    if (globalThis.innerWidth >= 992) {
         if (document.querySelector("body").classList.contains("sidenav-toggled") && document.querySelector("body").classList.contains("horizontal")) {
             document.querySelector("body").classList.remove("sidenav-toggled")
         }
@@ -218,27 +216,12 @@ jQuery(function () {
 hovermenu();
 
 
-// ______________HOVER JS start
-function hovermenu() {
-    $(".app-sidebar").hover(function () {
-        if ($('body').hasClass('sidenav-toggled')) {
-            $('body').addClass('sidenav-toggled-open');
-        }
-    }, function () {
-        if ($('body').hasClass('sidenav-toggled')) {
-            $('body').removeClass('sidenav-toggled-open');
-        }
-    });
-}
-// ______________HOVER JS end
-
-
 // ______________ICON-TEXT JS start
 function icontext() {
     $(".app-sidebar").off("mouseenter mouseleave");
 
     $(document).on('click', ".app-sidebar", function (event) {
-        if ($('body').hasClass('sidenav-toggled') == true) {
+        if ($('body').hasClass('sidenav-toggled')) {
             $('body').addClass('sidenav-toggled-open');
         }
     });
@@ -249,8 +232,8 @@ function icontext() {
 
     //Mobile menu 
     jQuery(document).ready(function ($) {
-        var alterClass = function () {
-            var ww = document.body.clientWidth;
+        let alterClass = function () {
+            let ww = document.body.clientWidth;
             if (ww < 992) {
                 $('body').removeClass('sidenav-toggled');
             } else if (ww >= 991) {
@@ -271,22 +254,26 @@ function icontext() {
 
 let slideLeft = document.querySelector(".slide-left");
 let slideRight = document.querySelector(".slide-right");
-slideLeft.addEventListener("click", () => {
-    slideClick()
-}, true)
-slideRight.addEventListener("click", () => { slideClick() }, true)
+if (slideLeft) {
+    slideLeft.addEventListener("click", () => {
+        slideClick()
+    }, true)
+}
+if (slideRight) {
+    slideRight.addEventListener("click", () => { slideClick() }, true)
+}
 
 // used to remove is-expanded class and remove class on clicking arrow buttons
 function slideClick() {
     let slide = document.querySelectorAll(".slide");
     let slideMenu = document.querySelectorAll(".slide-menu");
     slide.forEach((element, index) => {
-        if (element.classList.contains("is-expanded") == true) {
+        if (element.classList.contains("is-expanded")) {
             element.classList.remove("is-expanded")
         }
     });
     slideMenu.forEach((element, index) => {
-        if (element.classList.contains("open") == true) {
+        if (element.classList.contains("open")) {
             element.classList.remove("open");
             element.style.display = "none";
         }
@@ -294,8 +281,8 @@ function slideClick() {
 }
 
 // horizontal arrows
-var sideMenu = $(".side-menu");
-var slide = "100px";
+let sideMenu = $(".side-menu");
+let slide = "100px";
 
 let menuWidth = document.querySelector('.horizontal-main')
 let menuItems = document.querySelector('.side-menu')
@@ -306,8 +293,8 @@ $(window).resize(
         let menuItems = document.querySelector('.side-menu');
         let mainSidemenuWidth = document.querySelector('.main-sidemenu')  ;  
         let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth;
-        let marginLeftValue = Math.ceil(window.getComputedStyle(menuItems).marginLeft.split('px')[0]);
-        let marginRightValue = Math.ceil(window.getComputedStyle(menuItems).marginRight.split('px')[0]);
+        let marginLeftValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginLeft.split('px')[0]);
+        let marginRightValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginRight.split('px')[0]);
         let check = menuItems.scrollWidth + (0 - menuWidth?.offsetWidth) + menuContainerWidth;
         // to check and adjst the menu on screen size change
         if ($('body').hasClass('ltr')) {
@@ -351,11 +338,17 @@ function checkHoriMenu() {
 
     let menuWidth = document.querySelector('.horizontal-main')
     let menuItems = document.querySelector('.side-menu')
-    let mainSidemenuWidth = document.querySelector('.main-sidemenu')    
-    let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
-    let marginLeftValue = Math.ceil(window.getComputedStyle(menuItems).marginLeft.split('px')[0]);
-    let marginRightValue = Math.ceil(window.getComputedStyle(menuItems).marginRight.split('px')[0]);
-    let check = menuItems.scrollWidth + (0 - menuWidth?.offsetWidth) + menuContainerWidth;
+    let mainSidemenuWidth = document.querySelector('.main-sidemenu')
+    
+    // Elementler yoksa işlemi sonlandır
+    if (!menuWidth || !menuItems || !mainSidemenuWidth) {
+        return;
+    }
+    
+    let menuContainerWidth = menuWidth.offsetWidth - mainSidemenuWidth.offsetWidth
+    let marginLeftValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginLeft.split('px')[0]);
+    let marginRightValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginRight.split('px')[0]);
+    let check = menuItems.scrollWidth + (0 - menuWidth.offsetWidth) + menuContainerWidth;
 
     if ($('body').hasClass('ltr')) {
         menuItems.style.marginRight = 0
@@ -364,7 +357,7 @@ function checkHoriMenu() {
         menuItems.style.marginLeft = 0;
     }
 
-    if(menuItems.scrollWidth - 2 < (menuWidth?.offsetWidth - menuContainerWidth)){
+    if(menuItems.scrollWidth - 2 < (menuWidth.offsetWidth - menuContainerWidth)){
         $("#slide-right").addClass("d-none");
         $("#slide-left").addClass("d-none");
     }
@@ -387,7 +380,7 @@ $(document).on("click", ".ltr #slide-left", function () {
     let menuItems = document.querySelector('.side-menu')
     let mainSidemenuWidth = document.querySelector('.main-sidemenu')    
     let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
-    let marginLeftValue = Math.ceil(window.getComputedStyle(menuItems).marginLeft.split('px')[0]) + 100;
+    let marginLeftValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginLeft.split('px')[0]) + 100;
 
     if (marginLeftValue < 0) {
         sideMenu.stop(false, true).animate({
@@ -432,7 +425,7 @@ $(document).on("click", ".ltr #slide-right", function () {
     let menuItems = document.querySelector('.side-menu')
     let mainSidemenuWidth = document.querySelector('.main-sidemenu')
     let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
-    let marginLeftValue = Math.ceil(window.getComputedStyle(menuItems).marginLeft.split('px')[0]) - 100;
+    let marginLeftValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginLeft.split('px')[0]) - 100;
     let check = menuItems.scrollWidth + (0 - menuWidth?.offsetWidth) + menuContainerWidth;
     if (marginLeftValue > -check) {
         sideMenu.stop(false, true).animate({
@@ -475,7 +468,7 @@ $(document).on("click", ".rtl #slide-left", function () {
     let menuItems = document.querySelector('.side-menu')
     let mainSidemenuWidth = document.querySelector('.main-sidemenu')    
     let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
-    let marginRightValue = Math.ceil(window.getComputedStyle(menuItems).marginRight.split('px')[0]) + 100;
+    let marginRightValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginRight.split('px')[0]) + 100;
 
     if (marginRightValue < 0) {
         sideMenu.stop(false, true).animate({
@@ -518,7 +511,7 @@ $(document).on("click", ".rtl #slide-right", function () {
     let menuItems = document.querySelector('.side-menu')
     let mainSidemenuWidth = document.querySelector('.main-sidemenu')
     let menuContainerWidth = menuWidth?.offsetWidth - mainSidemenuWidth?.offsetWidth
-    let marginRightValue = Math.ceil(window.getComputedStyle(menuItems).marginRight.split('px')[0]) - 100;
+    let marginRightValue = Math.ceil(globalThis.getComputedStyle(menuItems).marginRight.split('px')[0]) - 100;
     let check = menuItems.scrollWidth + (0 - menuWidth?.offsetWidth) + menuContainerWidth;
     if (marginRightValue > -check) {
         sideMenu.stop(false, true).animate({

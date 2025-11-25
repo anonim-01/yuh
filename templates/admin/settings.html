@@ -1,5 +1,5 @@
 {% extends "admin/layout.html" %}
-{% block title %}Panel Ayarları - CHANTE ADMIN SYSTEM{% endblock %}
+{% block title %}Panel Ayarları - {{ panel_name }}{% endblock %}
 {% block content %}
   <div class="page-header">
     <h1 class="page-title">Panel Ayarları</h1>
@@ -129,7 +129,7 @@
                       <td><code>{{ alias.masked_host }}</code></td>
                       <td>
                         <div class="input-group">
-                          <input type="text" class="form-control" value="{{ alias.masked_url }}" readonly onclick="this.select()">
+                          <input type="text" class="form-control" value="{{ alias.masked_url }}" readonly onclick="this.select()" aria-label="Maskelenmiş URL" title="Seçmek için tıklayın">
                           <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('{{ alias.masked_url }}')">Kopyala</button>
                         </div>
                       </td>
@@ -154,6 +154,69 @@
       </div>
     </div>
   </div>
+
+  <!-- Security System Panel -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0"><i class="fa fa-shield-alt me-2"></i>Güvenlik ve Anonimlik Sistemi</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6 class="text-primary">IP Anonimleştirme</h6>
+              <div class="mb-3">
+                <label class="form-label">Sahte IP Üret</label>
+                <div class="input-group">
+                  <input type="text" id="fakeIpOutput" class="form-control" readonly>
+                  <button class="btn btn-primary" onclick="generateFakeIP()">Üret</button>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">IP Hash Test</label>
+                <div class="input-group">
+                  <input type="text" id="ipToHash" class="form-control" placeholder="185.67.32.10">
+                  <button class="btn btn-secondary" onclick="hashIP()">Hash'le</button>
+                </div>
+                <small id="hashedOutput" class="text-muted"></small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-success">Proxy Yönetimi</h6>
+              <form method="POST" class="mb-3">
+                <input type="hidden" name="form" value="add_proxy">
+                <div class="input-group">
+                  <input type="text" name="proxy_url" class="form-control" placeholder="http://proxy:8080" required>
+                  <button class="btn btn-success" type="submit">Proxy Ekle</button>
+                </div>
+              </form>
+              <form method="POST">
+                <input type="hidden" name="form" value="list_proxies">
+                <button class="btn btn-outline-info btn-sm" type="submit">Aktif Proxy'leri Göster</button>
+              </form>
+              {% if active_proxies %}
+              <div class="mt-2">
+                <small class="text-success">✓ {{ active_proxies|length }} aktif proxy</small>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-12">
+              <h6 class="text-info">Anonim Log Görüntüleyici</h6>
+              <form method="POST">
+                <input type="hidden" name="form" value="view_anonymous_logs">
+                <button class="btn btn-outline-dark" type="submit">Son 20 Anonim Log Kaydını Göster</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function() {
       const btn = document.getElementById('generateAliasBtn');
@@ -170,5 +233,30 @@
         input.select();
       });
     })();
+
+    // Security System Functions
+    function generateFakeIP() {
+      const octets = [
+        [10, 172, 192][Math.floor(Math.random() * 3)],
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256)
+      ];
+      const fakeIP = octets.join('.');
+      document.getElementById('fakeIpOutput').value = fakeIP;
+    }
+
+    function hashIP() {
+      const ip = document.getElementById('ipToHash').value;
+      if (!ip) return;
+      
+      // Simple hash simulation (real hashing happens server-side)
+      crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip))
+        .then(hash => {
+          const hashArray = Array.from(new Uint8Array(hash));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          document.getElementById('hashedOutput').textContent = `Hashed: ${hashHex.substring(0, 32)}...`;
+        });
+    }
   </script>
 {% endblock %}

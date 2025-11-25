@@ -15,7 +15,7 @@ html body {
   -ms-flex-pack:center;
   justify-content:center;
   -webkit-box-align:center;
-  -ms-flex-align:center;
+  -ms-flex-align:center;ok
   align-items:center
  }
 }
@@ -47,7 +47,7 @@ html body {
 #page header {
  border:none;
  margin:0;
- padding:0;
+ padding:1em 1.5em;
  font-weight:400;
  list-style:none;
  position:relative;
@@ -56,7 +56,6 @@ html body {
  background:#FFF;
  -webkit-box-sizing:border-box;
  box-sizing:border-box;
- padding:1em 1.5em;
  border-radius:.5em .5em 0 0;
  height:3.5em
 }
@@ -75,7 +74,7 @@ html body {
  text-indent:200%;
  white-space:nowrap;
  overflow:hidden;
- background-image:url(/themes/izmir/images/edkkds.1.svg);
+ background-image:url(/assets/img/edkkds.svg);
  background-repeat:no-repeat;
  height:1.66em;
  background-position:left center;
@@ -160,7 +159,7 @@ html body {
  border:none;
  margin:0;
  padding:0;
- font-weight:400;
+ font-weight:600;
  list-style:none;
  display:block;
  -webkit-box-sizing:border-box;
@@ -168,7 +167,6 @@ html body {
  height:1.5em;
  float:left;
  width:66%;
- font-weight:600;
  color:#3a89b4
 }
 @media (max-width:40em) {
@@ -247,9 +245,9 @@ html body {
  }
 }
 #page main .methodSelector #loginMenuButton {
- border:none;
+ border:1px solid rgba(58,137,180,.66);
  margin:0;
- padding:0;
+ padding:0 0 0 .5em;
  font-weight:400;
  list-style:none;
  height:2.75em;
@@ -257,9 +255,8 @@ html body {
  font-size:14px;
  display:block;
  float:right;
- border:1px solid rgba(58,137,180,.66);
  background:#FFF;
- background-image:url(/themes/izmir/images/selectdown.1.svg);
+ background-image:url(/assets/img/selectdown.1.svg);
  background-repeat:no-repeat;
  background-size:24px 24px,auto;
  background-position:right center;
@@ -268,7 +265,6 @@ html body {
  -webkit-box-sizing:border-box;
  box-sizing:border-box;
  font-style:normal;
- padding-left:.5em;
  z-index:9999;
  position:relative;
  -webkit-user-select:none;
@@ -288,7 +284,7 @@ html body {
  padding:.66em .66em .66em 2.5em;
  background-size:2em auto;
  background-repeat:no-repeat;
- background-image:url(/themes/izmir/images/auth-methods.1.svg)
+ background-image:url(/assets/img/auth-methods.1.svg)
 }
 #page main .methodSelector #loginMenuButton a {
  border:0;
@@ -312,7 +308,7 @@ html body {
 #page main .methodSelector #loginMenuButton.open {
  border-radius:.25em .25em 0 0;
  border-bottom:none;
- background-image:url(/themes/izmir/images/selectup.1.svg);
+ background-image:url(/assets/img/selectup.1.svg);
  background-color:#FFF;
  -webkit-box-shadow:none;
  box-shadow:none;
@@ -406,7 +402,7 @@ html body {
  color:#4a4e50;
  background-size:2em auto;
  background-repeat:no-repeat;
- background-image:url(/themes/izmir/images/auth-methods.1.svg);
+ background-image:url(/assets/img/auth-methods.1.svg);
  -webkit-user-select:none;
  -moz-user-select:none;
  -ms-user-select:none;
@@ -496,7 +492,7 @@ html body {
  padding:.66em .66em .66em 2.2em;
  background-size:2em auto;
  background-repeat:no-repeat;
- background-image:url(/themes/izmir/images/auth-methods.1.svg)
+ background-image:url(/assets/img/auth-methods.1.svg)
 }
 @media all and (max-width:875px) {
  #page main .methodSelector .comboChooser {
@@ -507,19 +503,16 @@ html body {
  }
 }
 #page #pageContent {
- border:none;
- margin:0;
- padding:0;
+ border:2px solid rgba(58,137,180,.2);
+ border-top:none;
+ margin:0 1.5em;
+ padding:1em;
  font-weight:400;
  list-style:none;
  background:#FFF;
- padding:1em;
- margin:0 1.5em;
  -webkit-box-sizing:border-box;
  box-sizing:border-box;
- border-radius:0 0 .33em .33em;
- border:2px solid rgba(58,137,180,.2);
- border-top:none
+ border-radius:0 0 .33em .33em
 }
 @media (max-width:40em) {
  #page #pageContent {
@@ -545,21 +538,18 @@ html body {
  text-decoration:none
 }
 #page #pageContent .richText a:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f145"
-}
-#page #pageContent .richText a:before {
+ content:"\f145";
  font-size:120%;
  margin-right:.25em
 }
@@ -589,19 +579,20 @@ html body {
  text-decoration:none
 }
 #page #pageContent .limitedText a:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f145"
+ content:"\f145";
+ font-size:120%;
+ margin-right:.25em
 }
 #page #pageContent .limitedText a:before {
  font-size:120%;
@@ -610,10 +601,9 @@ html body {
 #page footer {
  border:none;
  margin:0;
- padding:0;
+ padding:1em 1.5em;
  font-weight:400;
  list-style:none;
- padding:1em 1.5em;
  -webkit-box-sizing:content-box;
  box-sizing:content-box;
  color:#4a4e50
@@ -715,21 +705,18 @@ html body {
  border-bottom:1px solid rgba(131,10,10,.2)
 }
 #page .formRow .fieldError:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f146"
-}
-#page .formRow .fieldError:before {
+ content:"\f146";
  font-size:120%;
  vertical-align:text-bottom
 }
@@ -752,7 +739,7 @@ html body {
  float:left;
  width:auto;
  margin-right:1em;
- text-wrap:none
+ white-space:nowrap
 }
 #page .formRow .adjacentFields .fieldGroup .fieldLabel,
 #page .formRow .cascadingSelect .fieldGroup .fieldLabel,
@@ -852,7 +839,7 @@ html body {
 #page .formRow .date[pattern]:invalid,
 #page .formRow .text[pattern]:invalid,
 #page .formRow .treeSingle[pattern]:invalid {
- background-image:url(/themes/izmir/images/field-invalid.1.svg);
+ background-image:url(/assets/img/field-invalid.1.svg);
  background-size:2em 1.4em;
  background-position:center right;
  background-repeat:no-repeat
@@ -860,7 +847,7 @@ html body {
 #page .formRow .date[pattern]:valid,
 #page .formRow .text[pattern]:valid,
 #page .formRow .treeSingle[pattern]:valid {
- background-image:url(/themes/izmir/images/field-valid.1.svg);
+ background-image:url(/assets/img/field-valid.1.svg);
  background-size:2em 1.4em;
  background-position:center right;
  background-repeat:no-repeat
@@ -919,25 +906,20 @@ html body {
 }
 #page .formRow .calendarLink:before,
 #page .formRow .treeSinglePickLink:before {
- font-family:edk;
- display:inline-block;
+ font-family:edk, sans-serif;
+ display:block;
+ -webkit-box-sizing:border-box;
+ box-sizing:border-box;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f10d"
-}
-#page .formRow .calendarLink:before,
-#page .formRow .treeSinglePickLink:before {
- display:block;
- -webkit-box-sizing:border-box;
- box-sizing:border-box;
+ content:"\f10d";
  font-size:150%;
  padding:.3em;
  width:2em;
@@ -955,42 +937,36 @@ html body {
  margin-left:.5em
 }
 #page .formRow .maskedFieldLink:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f116"
-}
-#page .formRow .maskedFieldLink.active:before {
- font-family:edk;
- display:inline-block;
- vertical-align:middle;
- line-height:1;
- font-weight:400;
- font-style:normal;
- speak:none;
- text-decoration:inherit;
- text-transform:none;
- text-rendering:auto;
- -webkit-font-smoothing:antialiased;
- -moz-osx-font-smoothing:grayscale;
- content:"\f117"
-}
-#page .formRow .maskedFieldLink.active:before {
+ content:"\f116";
  font-size:150%;
  position:relative;
  margin-left:.25em;
  top:.075em
 }
-#page .formRow .maskedFieldLink:before {
+#page .formRow .maskedFieldLink.active:before {
+ font-family:edk, sans-serif;
+ display:inline-block;
+ vertical-align:middle;
+ line-height:1;
+ font-weight:400;
+ font-style:normal;
+ text-decoration:inherit;
+ text-transform:none;
+ text-rendering:auto;
+ -webkit-font-smoothing:antialiased;
+ -moz-osx-font-smoothing:grayscale;
+ content:"\f117";
  font-size:150%;
  position:relative;
  margin-left:.25em;
@@ -1007,21 +983,18 @@ html body {
  margin-left:.5em
 }
 #page .formRow .forgotPasswordLink:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f13d"
-}
-#page .formRow .forgotPasswordLink:before {
+ content:"\f13d";
  font-size:150%;
  position:relative;
  margin-left:.25em;
@@ -1031,13 +1004,12 @@ html body {
  min-width:25ex
 }
 #page .formRow .treeSinglePickLink:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
@@ -1091,7 +1063,7 @@ html body {
 #page .formRow .captchaImage {
  padding-right:2em;
  margin-right:.33em;
- background-image:url(/themes/izmir/images/right.1.svg);
+ background-image:url(/assets/img/right.1.svg);
  background-size:1em auto;
  background-position:center right;
  background-repeat:no-repeat;
@@ -1108,32 +1080,28 @@ html body {
  margin-right:.25em
 }
 #page .formRow .comboBox {
- border:none;
- margin:0;
- padding:0;
+ border:1px solid #a8acae;
+ margin:.25em 0;
+ padding:.25em 2em .25em 1em;
  font-weight:400;
  list-style:none;
- border:1px solid #a8acae;
  -webkit-box-shadow:0 1px 2px #CCC;
  box-shadow:0 1px 2px #CCC;
  background:#e7ebed;
- background-image:url(/themes/izmir/images/selectdown.1.svg),-webkit-gradient(linear,left top,left bottom,from(#FFF),to(#e7ebed));
- background-image:url(/themes/izmir/images/selectdown.1.svg),-o-linear-gradient(top,#FFF,#e7ebed);
- background-image:url(/themes/izmir/images/selectdown.1.svg),linear-gradient(to bottom,#FFF,#e7ebed);
+ background-image:url(/assets/img/selectdown.1.svg),-webkit-gradient(linear,left top,left bottom,from(#FFF),to(#e7ebed));
+ background-image:url(/assets/img/selectdown.1.svg),-o-linear-gradient(top,#FFF,#e7ebed);
+ background-image:url(/assets/img/selectdown.1.svg),linear-gradient(to bottom,#FFF,#e7ebed);
  background-repeat:no-repeat;
  background-size:24px 24px,auto;
  background-position:right center;
  color:#4a4e50;
  border-radius:.25em;
- padding:.25em 2em .25em 1em;
  -webkit-box-sizing:border-box;
  box-sizing:border-box;
  height:2.25em;
  -webkit-appearance:none;
  -moz-appearance:none;
- appearance:none;
- margin-top:.25em;
- margin-bottom:.25em
+ appearance:none
 }
 #page .formRow .comboBox::-ms-expand {
  display:none
@@ -1253,40 +1221,20 @@ html body {
 }
 #page .formRow .addressPickerLink:before,
 #page .formRow .treeMultiPickLink:before {
- font-family:edk;
- display:inline-block;
+ font-family:edk, sans-serif;
+ display:block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f128"
-}
-#page .formRow .addressPickerLink:before,
-#page .formRow .treeMultiPickLink:before {
- display:block;
+ content:"\f128";
  font-size:250%;
  padding-bottom:.1em
-}
-#page .formRow .treeMultiPickLink:before {
- font-family:edk;
- display:inline-block;
- vertical-align:middle;
- line-height:1;
- font-weight:400;
- font-style:normal;
- speak:none;
- text-decoration:inherit;
- text-transform:none;
- text-rendering:auto;
- -webkit-font-smoothing:antialiased;
- -moz-osx-font-smoothing:grayscale;
- content:"\f11c"
 }
 #page .formRow .addressPicker,
 #page .formRow .treeMulti {
@@ -1350,14 +1298,14 @@ html body {
 #page .formSubmitRow .cancelButton {
  background:rgba(74,78,80,.1);
  border:1px rgba(74,78,80,.3) solid;
- color:rgba(74,78,80,.9)
+ color:rgba(52,52,52,.95)
 }
 #page .formSubmitRow .backButton:hover,
 #page .formSubmitRow .cancelButton:hover {
  background-color:rgba(74,78,80,.05)
 }
 #page .formSubmitRow .backButton {
- background:rgba(74,78,80,.1) url(/themes/izmir/images/arrow-left.1.svg) no-repeat .66em center;
+ background:rgba(74,78,80,.1) url(/assets/img/arrow-left.1.svg) no-repeat .66em center;
  background-size:1em 1em;
  padding-left:2em;
  -webkit-box-ordinal-group:2;
@@ -1365,7 +1313,7 @@ html body {
  order:1
 }
 #page .formSubmitRow .submitButton {
- background:#347aa1 url(/themes/izmir/images/button-right.1.svg) no-repeat right center;
+ background:#347aa1 url(/assets/img/button-right.1.svg) no-repeat right center;
  background-size:1.4em 1.1em;
  padding-right:2em;
  -webkit-box-ordinal-group:3;
@@ -1377,19 +1325,16 @@ html body {
 #page .progressContainer,
 #page .reminderContainer,
 #page .warningContainer {
- border:none;
- margin:0;
- padding:0;
+ border:1px solid #e7ebed;
+ border-bottom-width:2px;
+ margin:0 0 1em 0;
+ padding:1em 1em 1em 4em;
  font-weight:400;
  list-style:none;
  font-size:85%;
  border-radius:.5em;
  -webkit-box-sizing:border-box;
  box-sizing:border-box;
- padding:1em 1em 1em 4em;
- border:1px solid #e7ebed;
- border-bottom-width:2px;
- margin-bottom:1em;
  background-position:1em center;
  background-repeat:no-repeat;
  background-size:2em 2em;
@@ -1397,27 +1342,27 @@ html body {
  color:#4a4e50
 }
 #page .errorContainer {
- background-image:url(/themes/izmir/images/form-error.1.svg);
+ background-image:url(/assets/img/form-error.1.svg);
  background-color:rgba(205,65,65,.05);
  border-color:#cd4141
 }
 #page .confirmContainer {
- background-image:url(/themes/izmir/images/form-confirm.1.svg);
+ background-image:url(/assets/img/form-confirm.1.svg);
  background-color:rgba(80,175,0,.05);
  border-color:#50af00
 }
 #page .reminderContainer {
- background-image:url(/themes/izmir/images/form-reminder.1.svg);
+ background-image:url(/assets/img/form-reminder.1.svg);
  background-color:rgba(75,135,200,.05);
  border-color:#4b87c8
 }
 #page .warningContainer {
- background-image:url(/themes/izmir/images/form-warning.1.svg);
+ background-image:url(/assets/img/form-warning.1.svg);
  background-color:rgba(255,165,0,.05);
  border-color:orange
 }
 #page .progressContainer {
- background-image:url(/themes/izmir/images/form-progress.1.svg);
+ background-image:url(/assets/img/form-progress.1.svg);
  background-color:rgba(127,127,127,.05);
  border-color:#DDD
 }
@@ -1433,7 +1378,7 @@ html body {
  padding:1em 1em 1em 4em;
  margin:1em 0 1em 0;
  min-height:3em;
- background:#fef9e2 url(/themes/izmir/images/form-disclaimer.1.svg) no-repeat 1em center;
+ background:#fef9e2 url(/assets/img/form-disclaimer.1.svg) no-repeat 1em center;
  background-size:2.5em 2.5em;
  border:1px solid #f7ea31;
  font-size:85%
@@ -1474,22 +1419,18 @@ html body {
 }
 #page .virtualKeyboard:before,
 #page .virtualKeypad:before {
- font-family:edk;
+ font-family:edk, sans-serif;
  display:inline-block;
  vertical-align:middle;
  line-height:1;
  font-weight:400;
  font-style:normal;
- speak:none;
  text-decoration:inherit;
  text-transform:none;
  text-rendering:auto;
  -webkit-font-smoothing:antialiased;
  -moz-osx-font-smoothing:grayscale;
- content:"\f123"
-}
-#page .virtualKeyboard:before,
-#page .virtualKeypad:before {
+ content:"\f123";
  font-size:150%;
  position:relative;
  margin-left:.25em;
@@ -1560,7 +1501,7 @@ html body {
  left:0;
  right:0;
  bottom:0;
- background:rgba(52,122,161,0);
+ background:transparent;
  z-index:99998;
  visibility:hidden;
  -webkit-transition:visibility 0s 1s,background 1s;
@@ -1671,8 +1612,6 @@ div.datepicker .datepickerContainer {
  background:#FFF;
  position:absolute;
  top:1em;
- background:#FFF -webkit-gradient(linear,left top,left bottom,color-stop(90%,#FFF),to(#e7ebed));
- background:#FFF -o-linear-gradient(top,#FFF 90%,#e7ebed 100%);
  background:#FFF linear-gradient(to bottom,#FFF 90%,#e7ebed 100%);
  border-radius:.66em;
  -webkit-box-shadow:0 .5em 2em rgba(74,78,80,.66);

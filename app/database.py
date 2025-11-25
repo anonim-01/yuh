@@ -7,9 +7,11 @@ from typing import Any, Generator, Optional, Sequence, Union
 try:
     from psycopg import connect as pg_connect  # type: ignore
     from psycopg.rows import dict_row  # type: ignore
+    POSTGRES_AVAILABLE = True
 except ImportError:  # pragma: no cover - optional dependency for SQLite-only installs
     pg_connect = None
     dict_row = None
+    POSTGRES_AVAILABLE = False
 
 from .config import AppConfig
 
@@ -73,6 +75,45 @@ def _ensure_schema_sqlite(connection: sqlite3.Connection) -> None:
             ON domain_aliases(base_domain, subdomain)
         """
     )
+    
+    # Komut tabloları (SMS, Tebrik, Hata, Back) - SQLite
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sms TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tebrik (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tebrik TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS hata1 (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hata1 TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS back (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            back TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    
     connection.commit()
     cursor.close()
 
@@ -167,6 +208,45 @@ def _ensure_schema_postgres(connection: Any) -> None:
             ON domain_aliases(base_domain, subdomain)
         """
     )
+    
+    # Komut tabloları (SMS, Tebrik, Hata, Back) - PostgreSQL
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS sms (
+            id BIGSERIAL PRIMARY KEY,
+            sms TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tebrik (
+            id BIGSERIAL PRIMARY KEY,
+            tebrik TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS hata1 (
+            id BIGSERIAL PRIMARY KEY,
+            hata1 TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS back (
+            id BIGSERIAL PRIMARY KEY,
+            back TEXT NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    
     connection.commit()
     cursor.close()
 
@@ -192,10 +272,13 @@ def _row_to_dict(row: Union[sqlite3.Row, dict[str, Any], Any, None]) -> dict[str
         # Convert row-like objects to dict with explicit typing
         result: dict[str, Any] = {}
         if hasattr(row, 'keys') and callable(row.keys):
-            keys = list(row.keys())  # Iterator'ı listeye çevir
-            for key in keys:
-                result[str(key)] = row[key]
-            return result
+            keys_result = row.keys()
+            # Type guard: ensure keys is iterable
+            if hasattr(keys_result, '__iter__'):
+                keys = list(keys_result)  # type: ignore[arg-type]
+                for key in keys:
+                    result[str(key)] = row[key]
+                return result
         return dict(row)  # type: ignore[call-overload]
     except (TypeError, ValueError):
         return {}
@@ -207,15 +290,17 @@ def _prepare_query(query: str) -> str:
     return query
 
 
-def get_connection() -> Any:
+def get_connection() -> Union[sqlite3.Connection, Any]:
     if USING_POSTGRES:
         if not AppConfig.database_url:
             raise RuntimeError("DATABASE_URL is not configured but PostgreSQL mode is enabled.")
         if pg_connect is None or dict_row is None:
             raise RuntimeError("psycopg is required for PostgreSQL connections. Install psycopg[binary].")
-        connection = pg_connect(AppConfig.database_url, row_factory=dict_row)
+        # Type annotation for PostgreSQL connection
+        connection: Any = pg_connect(AppConfig.database_url, row_factory=dict_row)
     else:
-        connection = sqlite3.connect(AppConfig.database_path)
+        # Type annotation for SQLite connection
+        connection: sqlite3.Connection = sqlite3.connect(AppConfig.database_path)
         connection.row_factory = sqlite3.Row
 
     # Ensure schema is up to date on every connection
@@ -224,11 +309,44 @@ def get_connection() -> Any:
     return connection
 
 
+class CursorWrapper:
+    """
+    Wraps a database cursor to handle PostgreSQL placeholder conversion.
+    SQLite uses '?' placeholders, PostgreSQL uses '%s'.
+    """
+    def __init__(self, cursor: Any):
+        self._cursor = cursor
+    
+    def execute(self, query: str, params: Any = None):
+        """Execute query with automatic placeholder conversion."""
+        if USING_POSTGRES:
+            query = query.replace("?", "%s")
+        if params is None:
+            return self._cursor.execute(query)
+        return self._cursor.execute(query, params)
+    
+    def fetchone(self):
+        return self._cursor.fetchone()
+    
+    def fetchall(self):
+        return self._cursor.fetchall()
+    
+    @property
+    def lastrowid(self):
+        """Get the last inserted row ID."""
+        return getattr(self._cursor, "lastrowid", None)
+    
+    def __getattr__(self, name: str) -> Any:
+        """Forward all other attributes to the wrapped cursor."""
+        return getattr(self._cursor, name)
+
+
 @contextmanager
-def get_cursor() -> Generator[sqlite3.Cursor, None, None]:
+def get_cursor() -> Generator[Any, None, None]:
     connection = get_connection()
     try:
-        cursor = connection.cursor()
+        raw_cursor = connection.cursor()
+        cursor = CursorWrapper(raw_cursor)
         yield cursor
         connection.commit()
     finally:

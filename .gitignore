@@ -3,7 +3,9 @@ __pycache__/
 *.pyc
 *.pyo
 *.log
-logs/
+logs/*.log
+logs/*.txt
+!logs/.gitkeep
 .env
 .DS_Store
 .idea/
